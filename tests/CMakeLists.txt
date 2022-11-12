@@ -35,7 +35,7 @@ if(ENABLE_COV)
     "${PROJECT_SOURCE_DIR}/tests/*"
   )
   SETUP_TARGET_FOR_COVERAGE_LCOV(NAME coverage
-    EXECUTABLE serialize_integer
+    EXECUTABLE ctest
     DEPENDENCIES serialize_integer
     LCOV_ARGS --rc lcov_branch_coverage=1
     GENHTML_ARGS --rc lcov_branch_coverage=1
