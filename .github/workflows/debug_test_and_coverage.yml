@@ -1,0 +1,32 @@
+name: Debug Test and Coverage
+
+on:
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install
+        run: sudo apt install -y lcov
+
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DENABLE_COV=on
+
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --parallel
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        run: make coverage | tee test.log
+
+      - name: Check Line Coverage
+        working-directory: ${{github.workspace}}/build
+        run: tail -n 10 test.log | grep -o "lines\.\+:\\s\+\\d\+\.\\d\+%" | grep -o "\\d\+\.\\d\+" | awk '{ if($1 <= 95){exit 1} }'
+
+      - name: Check Function Coverage
+        working-directory: ${{github.workspace}}/build
+        run: tail -n 10 test.log | grep -o "functions\.\+:\\s\+\\d\+\.\\d\+%" | grep -o "\\d\+\.\\d\+" | awk '{ if($1 < 100){exit 1} }'

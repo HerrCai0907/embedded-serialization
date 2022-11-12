@@ -16,7 +16,9 @@ public:
 
   T &operator[](u32 const index) const noexcept { return data_[index]; }
   T &at(u32 const index) const noexcept {
+    // LCOV_EXCL_START
     assert(index < size_);
+    // LCOV_EXCL_STOP
     return data_[index];
   }
 
