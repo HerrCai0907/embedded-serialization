@@ -21,5 +21,7 @@ function(TESTCASE test_name)
   gtest_discover_tests(${test_name}) 
 endfunction()
 
+TESTCASE(serialize_integer)
+
 
 
