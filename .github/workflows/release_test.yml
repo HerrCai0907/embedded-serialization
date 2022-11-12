@@ -1,4 +1,4 @@
-name: cmake build and test
+name: Release Test
 
 on:
   push:
