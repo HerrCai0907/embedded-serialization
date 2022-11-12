@@ -17,7 +17,7 @@ namespace detail {
 template <class BigEndian, class T> class SerializationSingleImpl;
 template <> class SerializationSingleImpl<BigEndian, u32> {
 public:
-  inline u32 operator()(u32 const &data, Span<u8> data_area) {
+  inline u32 operator()(u32 const &data, Span<u8> data_area) noexcept {
     data_area[0U] = static_cast<u8>(data & static_cast<u32>(0x000000ffU));
     data_area[1U] = static_cast<u8>((data & static_cast<u32>(0x0000ff00U)) >> 8U);
     data_area[2U] = static_cast<u8>((data & static_cast<u32>(0x00ff0000U)) >> 16U);
@@ -27,19 +27,31 @@ public:
 };
 template <> class SerializationSingleImpl<LittleEndian, u32> {
 public:
-  inline u32 operator()(u32 const &data, Span<u8> data_area) {
+  inline u32 operator()(u32 const &data, Span<u8> data_area) noexcept {
     std::memcpy(&data_area[0], &data, 4U);
     return 4U;
   }
 };
 template <> class SerializationSingleImpl<UnknownEndian, u32> {
 public:
-  inline u32 operator()(u32 const &data, Span<u8> data_area) {
+  inline u32 operator()(u32 const &data, Span<u8> data_area) noexcept {
     if (EndianTest::isBigEndian()) {
       return SerializationSingleImpl<BigEndian, u32>{}(data, data_area);
     } else {
       return SerializationSingleImpl<LittleEndian, u32>{}(data, data_area);
     }
+  }
+};
+
+template <class Endian, class T> class SerializationSingleImpl<Endian, Span<T>> {
+public:
+  inline u32 operator()(Span<T> const &data, Span<u8> data_area) noexcept {
+    u32 offset = SerializationSingleImpl<Endian, u32>{}(data.size(), data_area);
+    for (uint32_t i = 0; i < data.size(); ++i) {
+      u32 length = SerializationSingleImpl<Endian, u32>{}(data[i], data_area.subspan(offset));
+      offset += length;
+    }
+    return offset;
   }
 };
 

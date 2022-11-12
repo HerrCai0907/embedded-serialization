@@ -21,6 +21,7 @@ function(TESTCASE test_name)
 endfunction()
 
 TESTCASE(serialize_integer)
+TESTCASE(serialize_dyn_array)
 
 if(ENABLE_COV)
   # Coverage setup
