@@ -1,3 +1,4 @@
+#include "endian.h"
 #include "serialize.h"
 #include <array>
 #include <gtest/gtest.h>
@@ -46,5 +47,43 @@ TEST(serialize_integer, u32_u32) {
   expect_data_area[7] = 0x05;
 
   EXPECT_EQ(length, 8);
+  EXPECT_EQ(data_area, expect_data_area);
+}
+
+TEST(serialize_integer, big_endian_u32) {
+  std::array<u8, 16> data_area{};
+  embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};
+
+  std::tuple<u32> data{};
+  std::get<0>(data) = 0x01020304;
+
+  auto length = embedded_serialization::serialization<embedded_serialization::BigEndian>(data, data_span);
+
+  std::array<u8, 16> expect_data_area{};
+  expect_data_area[0] = 0x04;
+  expect_data_area[1] = 0x03;
+  expect_data_area[2] = 0x02;
+  expect_data_area[3] = 0x01;
+
+  EXPECT_EQ(length, 4);
+  EXPECT_EQ(data_area, expect_data_area);
+}
+
+TEST(serialize_integer, little_endian_u32) {
+  std::array<u8, 16> data_area{};
+  embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};
+
+  std::tuple<u32> data{};
+  std::get<0>(data) = 0x01020304;
+
+  auto length = embedded_serialization::serialization<embedded_serialization::LittleEndian>(data, data_span);
+
+  std::array<u8, 16> expect_data_area{};
+  expect_data_area[0] = 0x04;
+  expect_data_area[1] = 0x03;
+  expect_data_area[2] = 0x02;
+  expect_data_area[3] = 0x01;
+
+  EXPECT_EQ(length, 4);
   EXPECT_EQ(data_area, expect_data_area);
 }
