@@ -21,4 +21,12 @@ jobs:
 
       - name: Test
         working-directory: ${{github.workspace}}/build
-        run: make coverage
+        run: make coverage | tee test.log
+
+      - name: Check Line Coverage
+        working-directory: ${{github.workspace}}/build
+        run: tail -n 10 test.log | grep -o "lines\.\+:\\s\+\\d\+\.\\d\+%" | grep -o "\\d\+\.\\d\+" | awk '{ if($1 <= 95){exit 1} }'
+
+      - name: Check Function Coverage
+        working-directory: ${{github.workspace}}/build
+        run: tail -n 10 test.log | grep -o "functions\.\+:\\s\+\\d\+\.\\d\+%" | grep -o "\\d\+\.\\d\+" | awk '{ if($1 < 100){exit 1} }'
