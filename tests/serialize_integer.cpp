@@ -46,7 +46,7 @@ TEST(serialize_integer, u32_u32) {
   expect_data_area[6] = 0x06;
   expect_data_area[7] = 0x05;
 
-  EXPECT_EQ(length, 8);
+  EXPECT_EQ(length, 8U);
   EXPECT_EQ(data_area, expect_data_area);
 }
 
@@ -65,7 +65,7 @@ TEST(serialize_integer, big_endian_u32) {
   expect_data_area[2] = 0x02;
   expect_data_area[3] = 0x01;
 
-  EXPECT_EQ(length, 4);
+  EXPECT_EQ(length, 4U);
   EXPECT_EQ(data_area, expect_data_area);
 }
 
@@ -84,6 +84,6 @@ TEST(serialize_integer, little_endian_u32) {
   expect_data_area[2] = 0x02;
   expect_data_area[3] = 0x01;
 
-  EXPECT_EQ(length, 4);
+  EXPECT_EQ(length, 4U);
   EXPECT_EQ(data_area, expect_data_area);
 }

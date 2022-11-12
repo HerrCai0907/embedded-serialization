@@ -22,6 +22,9 @@ public:
     return data_[index];
   }
 
+  T *data() const noexcept { return data_; }
+  u32 size() const noexcept { return size_; }
+
   Span<T> subspan(u32 const offset) const noexcept { return Span<T>{&at(offset), size_ - offset}; }
 
 private:
