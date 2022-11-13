@@ -3,17 +3,12 @@
 
 #include "endian.h"
 #include "span.h"
-#include <cstdint>
+#include "type.h"
 #include <cstring>
 #include <tuple>
 #include <type_traits>
 
 namespace embedded_serialization {
-
-using u64 = uint64_t;
-using u32 = uint32_t;
-using u16 = uint16_t;
-using u8 = uint8_t;
 
 namespace detail {
 

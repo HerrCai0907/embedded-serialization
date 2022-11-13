@@ -23,6 +23,7 @@ endfunction()
 TESTCASE(serialize_integer)
 TESTCASE(serialize_dyn_array)
 TESTCASE(serialize_static_array)
+TESTCASE(size_traits)
 
 if(ENABLE_COV)
   # Coverage setup

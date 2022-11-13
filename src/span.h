@@ -1,9 +1,8 @@
 #ifndef __EMBEDDED_SERIALIZATION_SPAN__
 #define __EMBEDDED_SERIALIZATION_SPAN__
 
+#include "type.h"
 #include <cassert>
-#include <cstdint>
-
 namespace embedded_serialization {
 
 using u32 = uint32_t;
