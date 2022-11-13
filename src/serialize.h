@@ -164,7 +164,7 @@ public:
   static inline u32 serialize(SerializedSpan<T, Size, Size> const &data, Span<u8> data_area) noexcept {
     u32 offset = 0;
     for (uint32_t i = 0; i < Size; ++i) {
-      u32 length = SingleDataTypeImpl<Endian, u32>::serialize(data[i], data_area.subspan(offset));
+      u32 length = SingleDataTypeImpl<Endian, T>::serialize(data[i], data_area.subspan(offset));
       offset += length;
     }
     return offset;

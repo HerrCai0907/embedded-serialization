@@ -5,9 +5,6 @@
 #include <cassert>
 namespace embedded_serialization {
 
-using u32 = uint32_t;
-using u8 = uint8_t;
-
 template <class T> class Span {
 public:
   Span() noexcept : data_(nullptr), size_(0U) {}
