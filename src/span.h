@@ -32,6 +32,15 @@ private:
   u32 size_;
 };
 
+template <class T, u32 MinSize, u32 MaxSize> class SerializedSpan : public Span<T> {
+public:
+  SerializedSpan(T *const data, u32 const size) noexcept : Span<T>(data, size) {
+    // LCOV_EXCL_START
+    assert(size >= MinSize && size <= MaxSize);
+    // LCOV_EXCL_STOP
+  }
+};
+
 }; // namespace embedded_serialization
 
 #endif
