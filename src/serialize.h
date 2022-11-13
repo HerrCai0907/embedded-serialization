@@ -42,12 +42,23 @@ public:
     }
   }
 };
-
-template <class Endian, class T> class SerializationSingleImpl<Endian, Span<T>> {
+template <class Endian, class T, u32 MinSize, u32 MaxSize>
+class SerializationSingleImpl<Endian, SerializedSpan<T, MinSize, MaxSize>> {
 public:
-  inline u32 operator()(Span<T> const &data, Span<u8> data_area) noexcept {
+  inline u32 operator()(SerializedSpan<T, MinSize, MaxSize> const &data, Span<u8> data_area) noexcept {
     u32 offset = SerializationSingleImpl<Endian, u32>{}(data.size(), data_area);
     for (uint32_t i = 0; i < data.size(); ++i) {
+      u32 length = SerializationSingleImpl<Endian, u32>{}(data[i], data_area.subspan(offset));
+      offset += length;
+    }
+    return offset;
+  }
+};
+template <class Endian, class T, u32 Size> class SerializationSingleImpl<Endian, SerializedSpan<T, Size, Size>> {
+public:
+  inline u32 operator()(SerializedSpan<T, Size, Size> const &data, Span<u8> data_area) noexcept {
+    u32 offset = 0;
+    for (uint32_t i = 0; i < Size; ++i) {
       u32 length = SerializationSingleImpl<Endian, u32>{}(data[i], data_area.subspan(offset));
       offset += length;
     }

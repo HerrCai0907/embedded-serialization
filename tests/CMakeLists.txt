@@ -1,4 +1,4 @@
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -22,6 +22,7 @@ endfunction()
 
 TESTCASE(serialize_integer)
 TESTCASE(serialize_dyn_array)
+TESTCASE(serialize_static_array)
 
 if(ENABLE_COV)
   # Coverage setup
