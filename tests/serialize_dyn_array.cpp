@@ -16,6 +16,7 @@ TEST(serialize_dyn_array, u32) {
   auto data = std::make_tuple(embedded_serialization::SerializedSpan<u32, 0U, 256U>{rawdata.data(), rawdata.size()});
 
   auto length = embedded_serialization::serialization(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), length);
 
   std::array<u8, 32> expect_data_area{};
   u32 offset = 0U;
