@@ -2,18 +2,14 @@
 #define __EMBEDDED_SERIALIZATION_SERIALIZE__
 
 #include "endian.h"
+#include "size_traits.h"
 #include "span.h"
-#include <cstdint>
+#include "type.h"
 #include <cstring>
 #include <tuple>
 #include <type_traits>
 
 namespace embedded_serialization {
-
-using u64 = uint64_t;
-using u32 = uint32_t;
-using u16 = uint16_t;
-using u8 = uint8_t;
 
 namespace detail {
 
@@ -113,7 +109,8 @@ template <class Endian, class T, u32 MinSize, u32 MaxSize>
 class SerializationSingleImpl<Endian, SerializedSpan<T, MinSize, MaxSize>> {
 public:
   inline u32 operator()(SerializedSpan<T, MinSize, MaxSize> const &data, Span<u8> data_area) noexcept {
-    u32 offset = SerializationSingleImpl<Endian, u32>{}(data.size(), data_area);
+    using SizeType = typename SizeTraits<static_cast<u64>(MaxSize)>::type;
+    u32 offset = SerializationSingleImpl<Endian, SizeType>{}(data.size(), data_area);
     for (uint32_t i = 0; i < data.size(); ++i) {
       u32 length = SerializationSingleImpl<Endian, u32>{}(data[i], data_area.subspan(offset));
       offset += length;

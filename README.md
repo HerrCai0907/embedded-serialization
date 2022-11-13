@@ -6,10 +6,15 @@ serialization library for embedded device (header only)
 
 | type          | format                           |
 | ------------- | -------------------------------- |
+| u8            | 1 bytes little endian data       |
+| u16           | 2 bytes little endian data       |
 | u32           | 4 bytes little endian data       |
+| u64           | 8 bytes little endian data       |
 | static array  | T ...                            |
-| dynamic array | size:u32 + T ...                 |
+| dynamic array | size<sup>1</sup> + T ...         |
 | other         | compile time error "not support" |
+
+1. The size is automatically adjusted according to the maximum number of array elements
 
 ## Build and Test
 
