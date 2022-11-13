@@ -1,5 +1,10 @@
 # embedded-serialization
 
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/HerrCai0907/embedded-serialization/Release%20Test/main?label=build%20and%20test)
+![GitHub last commit](https://img.shields.io/github/last-commit/HerrCai0907/embedded-serialization/main)
+![GitHub License](https://img.shields.io/github/license/HerrCai0907/embedded-serialization)
+![GitHub repo size](https://img.shields.io/github/repo-size/HerrCai0907/embedded-serialization)
+
 serialization library for embedded device (header only)
 
 ## serialized bytes
