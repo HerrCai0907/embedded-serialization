@@ -5,7 +5,9 @@
 #include <gtest/gtest.h>
 #include <tuple>
 
+using u64 = uint64_t;
 using u32 = uint32_t;
+using u16 = uint16_t;
 using u8 = uint8_t;
 
 TEST(serialize_static_array, u32) {
@@ -16,6 +18,7 @@ TEST(serialize_static_array, u32) {
   auto data = std::make_tuple(embedded_serialization::SerializedSpan<u32, 4U, 4U>{rawdata.data(), rawdata.size()});
 
   auto length = embedded_serialization::serialization(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), length);
 
   std::array<u8, 32> expect_data_area{};
   u32 offset = 0U;
@@ -40,6 +43,31 @@ TEST(serialize_static_array, u32) {
   expect_data_area[offset++] = 0x00;
   expect_data_area[offset++] = 0x00;
 
-  EXPECT_EQ(length, 16U);
+  EXPECT_EQ(length, offset);
+  EXPECT_EQ(data_area, expect_data_area);
+}
+
+TEST(serialize_static_array, u8) {
+  std::array<u8, 32> data_area{};
+  embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};
+
+  std::array<u8, 4> rawdata{1, 2, 3, 4};
+  auto data = std::make_tuple(embedded_serialization::SerializedSpan<u8, 4U, 4U>{rawdata.data(), rawdata.size()});
+
+  auto length = embedded_serialization::serialization(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), length);
+
+  std::array<u8, 32> expect_data_area{};
+  u32 offset = 0U;
+  // element 1
+  expect_data_area[offset++] = 0x01;
+  // element 2
+  expect_data_area[offset++] = 0x02;
+  // element 3
+  expect_data_area[offset++] = 0x03;
+  // element 4
+  expect_data_area[offset++] = 0x04;
+
+  EXPECT_EQ(length, offset);
   EXPECT_EQ(data_area, expect_data_area);
 }

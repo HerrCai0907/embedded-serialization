@@ -15,6 +15,7 @@ TEST(serialize_integer, const_type) {
   std::tuple<const u8> data{0x0f};
 
   auto length = embedded_serialization::serialization(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), length);
 
   std::array<u8, 16> expect_data_area{};
   expect_data_area[0U] = 0x0f;
@@ -37,6 +38,7 @@ TEST(serialize_integer, u64) {
   std::get<0>(data) = 0x0102030405060708;
 
   auto length = embedded_serialization::serialization(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), length);
 
   std::array<u8, 16> expect_data_area{};
   expect_data_area[0U] = 0x08;
@@ -60,6 +62,7 @@ TEST(serialize_integer, big_endian_u64) {
   std::get<0>(data) = 0x0102030405060708;
 
   auto length = embedded_serialization::serialization<embedded_serialization::BigEndian>(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), length);
 
   std::array<u8, 16> expect_data_area{};
   expect_data_area[0U] = 0x08;
@@ -83,6 +86,7 @@ TEST(serialize_integer, little_endian_u64) {
   std::get<0>(data) = 0x0102030405060708;
 
   auto length = embedded_serialization::serialization<embedded_serialization::LittleEndian>(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), length);
 
   std::array<u8, 16> expect_data_area{};
   expect_data_area[0U] = 0x08;
@@ -112,6 +116,7 @@ TEST(serialize_integer, u32) {
   std::get<0>(data) = 0x01020304;
 
   auto length = embedded_serialization::serialization(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), length);
 
   std::array<u8, 16> expect_data_area{};
   expect_data_area[0U] = 0x04;
@@ -132,6 +137,7 @@ TEST(serialize_integer, u32_u32) {
   std::get<1>(data) = 0x05060708;
 
   auto length = embedded_serialization::serialization(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), length);
 
   std::array<u8, 16> expect_data_area{};
   expect_data_area[0U] = 0x04;
@@ -156,6 +162,7 @@ TEST(serialize_integer, big_endian_u32) {
   std::get<0>(data) = 0x01020304;
 
   auto length = embedded_serialization::serialization<embedded_serialization::BigEndian>(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), length);
 
   std::array<u8, 16> expect_data_area{};
   expect_data_area[0U] = 0x04;
@@ -175,6 +182,7 @@ TEST(serialize_integer, little_endian_u32) {
   std::get<0>(data) = 0x01020304;
 
   auto length = embedded_serialization::serialization<embedded_serialization::LittleEndian>(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), length);
 
   std::array<u8, 16> expect_data_area{};
   expect_data_area[0U] = 0x04;
@@ -200,6 +208,7 @@ TEST(serialize_integer, u16) {
   std::get<0>(data) = 0x0102;
 
   auto length = embedded_serialization::serialization(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), length);
 
   std::array<u8, 16> expect_data_area{};
   expect_data_area[0U] = 0x02;
@@ -217,6 +226,7 @@ TEST(serialize_integer, big_endian_u16) {
   std::get<0>(data) = 0x0102;
 
   auto length = embedded_serialization::serialization<embedded_serialization::BigEndian>(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), length);
 
   std::array<u8, 16> expect_data_area{};
   expect_data_area[0U] = 0x02;
@@ -234,6 +244,7 @@ TEST(serialize_integer, little_endian_u16) {
   std::get<0>(data) = 0x0102;
 
   auto length = embedded_serialization::serialization<embedded_serialization::LittleEndian>(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), length);
 
   std::array<u8, 16> expect_data_area{};
   expect_data_area[0U] = 0x02;
@@ -257,6 +268,7 @@ TEST(serialize_integer, u8) {
   std::get<0>(data) = 0x0f;
 
   auto length = embedded_serialization::serialization(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), length);
 
   std::array<u8, 16> expect_data_area{};
   expect_data_area[0U] = 0x0f;
