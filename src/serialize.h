@@ -6,15 +6,51 @@
 #include <cstdint>
 #include <cstring>
 #include <tuple>
+#include <type_traits>
 
 namespace embedded_serialization {
 
+using u64 = uint64_t;
 using u32 = uint32_t;
+using u16 = uint16_t;
 using u8 = uint8_t;
 
 namespace detail {
 
 template <class BigEndian, class T> class SerializationSingleImpl;
+
+template <class Endian> class SerializationSingleImpl<Endian, u8> {
+public:
+  inline u32 operator()(u8 const &data, Span<u8> data_area) noexcept {
+    data_area[0U] = data;
+    return 1U;
+  }
+};
+template <> class SerializationSingleImpl<BigEndian, u16> {
+public:
+  inline u32 operator()(u16 const &data, Span<u8> data_area) noexcept {
+    data_area[0U] = static_cast<u8>(data & static_cast<u16>(0x00ffU));
+    data_area[1U] = static_cast<u8>((data & static_cast<u16>(0xff00U)) >> 8U);
+    return 2U;
+  }
+};
+template <> class SerializationSingleImpl<LittleEndian, u16> {
+public:
+  inline u32 operator()(u16 const &data, Span<u8> data_area) noexcept {
+    std::memcpy(&data_area[0], &data, 2U);
+    return 2U;
+  }
+};
+template <> class SerializationSingleImpl<UnknownEndian, u16> {
+public:
+  inline u32 operator()(u16 const &data, Span<u8> data_area) noexcept {
+    if (EndianTest::isBigEndian()) {
+      return SerializationSingleImpl<BigEndian, u16>{}(data, data_area);
+    } else {
+      return SerializationSingleImpl<LittleEndian, u16>{}(data, data_area);
+    }
+  }
+};
 template <> class SerializationSingleImpl<BigEndian, u32> {
 public:
   inline u32 operator()(u32 const &data, Span<u8> data_area) noexcept {
@@ -39,6 +75,37 @@ public:
       return SerializationSingleImpl<BigEndian, u32>{}(data, data_area);
     } else {
       return SerializationSingleImpl<LittleEndian, u32>{}(data, data_area);
+    }
+  }
+};
+template <> class SerializationSingleImpl<BigEndian, u64> {
+public:
+  inline u32 operator()(u64 const &data, Span<u8> data_area) noexcept {
+    data_area[0U] = static_cast<u8>(data & static_cast<u64>(0x00000000000000ffU));
+    data_area[1U] = static_cast<u8>((data & static_cast<u64>(0x000000000000ff00U)) >> 8U);
+    data_area[2U] = static_cast<u8>((data & static_cast<u64>(0x0000000000ff0000U)) >> 16U);
+    data_area[3U] = static_cast<u8>((data & static_cast<u64>(0x00000000ff000000U)) >> 24U);
+    data_area[4U] = static_cast<u8>((data & static_cast<u64>(0x000000ff00000000U)) >> 32U);
+    data_area[5U] = static_cast<u8>((data & static_cast<u64>(0x0000ff0000000000U)) >> 40U);
+    data_area[6U] = static_cast<u8>((data & static_cast<u64>(0x00ff000000000000U)) >> 48U);
+    data_area[7U] = static_cast<u8>((data & static_cast<u64>(0xff00000000000000U)) >> 56U);
+    return 8U;
+  }
+};
+template <> class SerializationSingleImpl<LittleEndian, u64> {
+public:
+  inline u32 operator()(u64 const &data, Span<u8> data_area) noexcept {
+    std::memcpy(&data_area[0], &data, 8U);
+    return 8U;
+  }
+};
+template <> class SerializationSingleImpl<UnknownEndian, u64> {
+public:
+  inline u32 operator()(u64 const &data, Span<u8> data_area) noexcept {
+    if (EndianTest::isBigEndian()) {
+      return SerializationSingleImpl<BigEndian, u64>{}(data, data_area);
+    } else {
+      return SerializationSingleImpl<LittleEndian, u64>{}(data, data_area);
     }
   }
 };
@@ -69,8 +136,9 @@ public:
 template <class Endian, u32 Start, u32 End, class... Args> class SerializationImpl {
 public:
   u32 operator()(std::tuple<Args...> const &data, Span<u8> const data_area) noexcept {
-    u32 length = SerializationSingleImpl<Endian, typename std::tuple_element<Start, std::tuple<Args...>>::type>{}(
-        std::get<Start>(data), data_area);
+    using StartElementType = typename std::tuple_element<Start, std::tuple<Args...>>::type;
+    using StartElementCleanType = typename std::remove_const<StartElementType>::type;
+    u32 length = SerializationSingleImpl<Endian, StartElementCleanType>{}(std::get<Start>(data), data_area);
     Span<u8> const new_span = data_area.subspan(length);
     u32 other_length = SerializationImpl<Endian, Start + 1, End, Args...>{}(data, new_span);
     return length + other_length;
