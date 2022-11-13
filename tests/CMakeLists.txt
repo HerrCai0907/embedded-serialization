@@ -13,11 +13,14 @@ FetchContent_MakeAvailable(googletest)
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include(GoogleTest)
 
+set(TESTCASES)
+
 function(TESTCASE test_name)
   message(STATUS "test case ${test_name}")
   add_executable(${test_name} ${test_name}.cpp)
   target_link_libraries(${test_name} GTest::gtest_main)
   gtest_discover_tests(${test_name})
+  set(TESTCASES ${TESTCASES} ${test_name} PARENT_SCOPE)
 endfunction()
 
 TESTCASE(serialize_integer)
@@ -37,9 +40,10 @@ if(ENABLE_COV)
     "${gtest_SOURCE_DIR}/*"
     "${PROJECT_SOURCE_DIR}/tests/*"
   )
+
   SETUP_TARGET_FOR_COVERAGE_LCOV(NAME coverage
     EXECUTABLE ctest
-    DEPENDENCIES serialize_integer
+    DEPENDENCIES ${TESTCASES}
     LCOV_ARGS --rc lcov_branch_coverage=1
     GENHTML_ARGS --rc lcov_branch_coverage=1
   )
