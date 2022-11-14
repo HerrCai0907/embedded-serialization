@@ -14,12 +14,12 @@ namespace embedded_serialization {
 
 namespace detail {
 
-template <class BigEndian, class T> class SingleDataTypeImpl {
+template <class BigEndian, class T> class SerializeImpl {
 public:
   using SupportedType = std::false_type;
 };
 
-template <class Endian> class SingleDataTypeImpl<Endian, u8> {
+template <class Endian> class SerializeImpl<Endian, u8> {
 public:
   using SupportedType = std::true_type;
   static inline u32 get_size(u8 const &data) noexcept { return 1U; }
@@ -28,7 +28,7 @@ public:
     return 1U;
   }
 };
-template <> class SingleDataTypeImpl<BigEndian, u16> {
+template <> class SerializeImpl<BigEndian, u16> {
 public:
   using SupportedType = std::true_type;
   static inline u32 get_size(u16 const &data) noexcept { return 2U; }
@@ -38,7 +38,7 @@ public:
     return 2U;
   }
 };
-template <> class SingleDataTypeImpl<LittleEndian, u16> {
+template <> class SerializeImpl<LittleEndian, u16> {
 public:
   using SupportedType = std::true_type;
   static inline u32 get_size(u16 const &data) noexcept { return 2U; }
@@ -47,19 +47,19 @@ public:
     return 2U;
   }
 };
-template <> class SingleDataTypeImpl<UnknownEndian, u16> {
+template <> class SerializeImpl<UnknownEndian, u16> {
 public:
   using SupportedType = std::true_type;
   static inline u32 get_size(u16 const &data) noexcept { return 2U; }
   static inline u32 serialize(u16 const &data, Span<u8> data_area) noexcept {
     if (EndianTest::isBigEndian()) {
-      return SingleDataTypeImpl<BigEndian, u16>::serialize(data, data_area);
+      return SerializeImpl<BigEndian, u16>::serialize(data, data_area);
     } else {
-      return SingleDataTypeImpl<LittleEndian, u16>::serialize(data, data_area);
+      return SerializeImpl<LittleEndian, u16>::serialize(data, data_area);
     }
   }
 };
-template <> class SingleDataTypeImpl<BigEndian, u32> {
+template <> class SerializeImpl<BigEndian, u32> {
 public:
   using SupportedType = std::true_type;
   static inline u32 get_size(u32 const &data) noexcept { return 4U; }
@@ -71,7 +71,7 @@ public:
     return 4U;
   }
 };
-template <> class SingleDataTypeImpl<LittleEndian, u32> {
+template <> class SerializeImpl<LittleEndian, u32> {
 public:
   using SupportedType = std::true_type;
   static inline u32 get_size(u32 const &data) noexcept { return 4U; }
@@ -80,19 +80,19 @@ public:
     return 4U;
   }
 };
-template <> class SingleDataTypeImpl<UnknownEndian, u32> {
+template <> class SerializeImpl<UnknownEndian, u32> {
 public:
   using SupportedType = std::true_type;
   static inline u32 get_size(u32 const &data) noexcept { return 4U; }
   static inline u32 serialize(u32 const &data, Span<u8> data_area) noexcept {
     if (EndianTest::isBigEndian()) {
-      return SingleDataTypeImpl<BigEndian, u32>::serialize(data, data_area);
+      return SerializeImpl<BigEndian, u32>::serialize(data, data_area);
     } else {
-      return SingleDataTypeImpl<LittleEndian, u32>::serialize(data, data_area);
+      return SerializeImpl<LittleEndian, u32>::serialize(data, data_area);
     }
   }
 };
-template <> class SingleDataTypeImpl<BigEndian, u64> {
+template <> class SerializeImpl<BigEndian, u64> {
 public:
   using SupportedType = std::true_type;
   static inline u32 get_size(u32 const &data) noexcept { return 4U; }
@@ -108,7 +108,7 @@ public:
     return 8U;
   }
 };
-template <> class SingleDataTypeImpl<LittleEndian, u64> {
+template <> class SerializeImpl<LittleEndian, u64> {
 public:
   using SupportedType = std::true_type;
   static inline u32 get_size(u64 const &data) noexcept { return 8U; }
@@ -117,20 +117,20 @@ public:
     return 8U;
   }
 };
-template <> class SingleDataTypeImpl<UnknownEndian, u64> {
+template <> class SerializeImpl<UnknownEndian, u64> {
 public:
   using SupportedType = std::true_type;
   static inline u32 get_size(u64 const &data) noexcept { return 8U; }
   static inline u32 serialize(u64 const &data, Span<u8> data_area) noexcept {
     if (EndianTest::isBigEndian()) {
-      return SingleDataTypeImpl<BigEndian, u64>::serialize(data, data_area);
+      return SerializeImpl<BigEndian, u64>::serialize(data, data_area);
     } else {
-      return SingleDataTypeImpl<LittleEndian, u64>::serialize(data, data_area);
+      return SerializeImpl<LittleEndian, u64>::serialize(data, data_area);
     }
   }
 };
 template <class Endian, class T, u32 MinSize, u32 MaxSize>
-class SingleDataTypeImpl<Endian, SerializedSpan<T, MinSize, MaxSize>> {
+class SerializeImpl<Endian, SerializedSpan<T, MinSize, MaxSize>> {
   using SizeType = typename SizeTraits<static_cast<u64>(MaxSize)>::type;
 
 public:
@@ -138,59 +138,59 @@ public:
   static inline u32 get_size(SerializedSpan<T, MinSize, MaxSize> const &data) noexcept {
     u32 size = sizeof(SizeType);
     for (u32 i = 0; i < data.size(); ++i) {
-      size += SingleDataTypeImpl<Endian, T>::get_size(data[i]);
+      size += SerializeImpl<Endian, T>::get_size(data[i]);
     }
     return size;
   }
   static inline u32 serialize(SerializedSpan<T, MinSize, MaxSize> const &data, Span<u8> data_area) noexcept {
-    u32 offset = SingleDataTypeImpl<Endian, SizeType>::serialize(data.size(), data_area);
+    u32 offset = SerializeImpl<Endian, SizeType>::serialize(data.size(), data_area);
     for (uint32_t i = 0; i < data.size(); ++i) {
-      u32 length = SingleDataTypeImpl<Endian, T>::serialize(data[i], data_area.subspan(offset));
+      u32 length = SerializeImpl<Endian, T>::serialize(data[i], data_area.subspan(offset));
       offset += length;
     }
     return offset;
   }
 };
-template <class Endian, class T, u32 Size> class SingleDataTypeImpl<Endian, SerializedSpan<T, Size, Size>> {
+template <class Endian, class T, u32 Size> class SerializeImpl<Endian, SerializedSpan<T, Size, Size>> {
 public:
   using SupportedType = std::true_type;
   static inline u32 get_size(SerializedSpan<T, Size, Size> const &data) noexcept {
     u32 size = 0;
     for (u32 i = 0; i < data.size(); ++i) {
-      size += SingleDataTypeImpl<Endian, T>::get_size(data[i]);
+      size += SerializeImpl<Endian, T>::get_size(data[i]);
     }
     return size;
   }
   static inline u32 serialize(SerializedSpan<T, Size, Size> const &data, Span<u8> data_area) noexcept {
     u32 offset = 0;
     for (uint32_t i = 0; i < Size; ++i) {
-      u32 length = SingleDataTypeImpl<Endian, T>::serialize(data[i], data_area.subspan(offset));
+      u32 length = SerializeImpl<Endian, T>::serialize(data[i], data_area.subspan(offset));
       offset += length;
     }
     return offset;
   }
 };
-template <class Endian, class... Args> class SingleDataTypeImpl<Endian, std::tuple<Args...>> {
+template <class Endian, class... Args> class SerializeImpl<Endian, std::tuple<Args...>> {
   using DataType = std::tuple<Args...>;
 
-  template <u32 Start, u32 End> class TupleSerializationImpl {
+  template <u32 Start, u32 End> class TupleSerializeImpl {
     using StartElementType = typename std::tuple_element<Start, std::tuple<Args...>>::type;
     using StartElementCleanType = typename std::remove_const<StartElementType>::type;
-    static_assert(SingleDataTypeImpl<Endian, StartElementCleanType>::SupportedType::value, "not support type");
+    static_assert(SerializeImpl<Endian, StartElementCleanType>::SupportedType::value, "not support type");
 
   public:
     static inline u32 get_size(std::tuple<Args...> const &data) noexcept {
-      return SingleDataTypeImpl<Endian, StartElementCleanType>::get_size(std::get<Start>(data)) +
-             TupleSerializationImpl<Start + 1, End>::get_size(data);
+      return SerializeImpl<Endian, StartElementCleanType>::get_size(std::get<Start>(data)) +
+             TupleSerializeImpl<Start + 1, End>::get_size(data);
     }
     static inline u32 serialize(std::tuple<Args...> const &data, Span<u8> const data_area) noexcept {
-      u32 length = SingleDataTypeImpl<Endian, StartElementCleanType>::serialize(std::get<Start>(data), data_area);
+      u32 length = SerializeImpl<Endian, StartElementCleanType>::serialize(std::get<Start>(data), data_area);
       Span<u8> const new_span = data_area.subspan(length);
-      u32 other_length = TupleSerializationImpl<Start + 1, End>::serialize(data, new_span);
+      u32 other_length = TupleSerializeImpl<Start + 1, End>::serialize(data, new_span);
       return length + other_length;
     }
   };
-  template <u32 End> class TupleSerializationImpl<End, End> {
+  template <u32 End> class TupleSerializeImpl<End, End> {
   public:
     static inline u32 get_size(DataType const &data) noexcept { return 0U; }
     static inline u32 serialize(DataType const &data, Span<u8> const data_area) noexcept { return 0U; }
@@ -200,23 +200,23 @@ public:
   using SupportedType = std::true_type;
 
   static inline u32 get_size(std::tuple<Args...> const &data) noexcept {
-    return TupleSerializationImpl<0U, std::tuple_size<DataType>::value>::get_size(data);
+    return TupleSerializeImpl<0U, std::tuple_size<DataType>::value>::get_size(data);
   }
   static inline u32 serialize(std::tuple<Args...> const &data, Span<u8> data_area) noexcept {
-    return TupleSerializationImpl<0U, std::tuple_size<DataType>::value>::serialize(data, data_area);
+    return TupleSerializeImpl<0U, std::tuple_size<DataType>::value>::serialize(data, data_area);
   }
 };
 
 }; // namespace detail
 
 template <class Endian = UnknownEndian, class T> u32 get_size(T const &data) noexcept {
-  return detail::SingleDataTypeImpl<Endian, T>::get_size(data);
+  return detail::SerializeImpl<Endian, T>::get_size(data);
 }
 template <class Endian = UnknownEndian, class T> u32 serialization(T const &data, Span<u8> const data_area) noexcept {
   // LCOV_EXCL_START
   assert(data_area.size() >= get_size(data) && "data size not enough");
   // LCOV_EXCL_STOP
-  return detail::SingleDataTypeImpl<Endian, T>::serialize(data, data_area);
+  return detail::SerializeImpl<Endian, T>::serialize(data, data_area);
 }
 
 }; // namespace embedded_serialization
