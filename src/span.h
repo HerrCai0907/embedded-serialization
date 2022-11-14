@@ -54,7 +54,6 @@ bool operator==(SerializedSpan<T, MinSize, MaxSize> const &lhs,
   }
   return true;
 }
-
 template <class T, u32 MinSize, u32 MaxSize>
 bool operator!=(SerializedSpan<T, MinSize, MaxSize> const &lhs,
                 SerializedSpan<T, MinSize, MaxSize> const &rhs) noexcept {
