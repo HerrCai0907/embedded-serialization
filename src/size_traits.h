@@ -15,6 +15,6 @@ public:
                                 typename std::conditional<(Size > UINT8_MAX), u16, u8>::type>::type>::type;
 };
 
-}; // namespace embedded_serialization
+} // namespace embedded_serialization
 
 #endif

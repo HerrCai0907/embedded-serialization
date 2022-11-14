@@ -22,6 +22,10 @@ public:
   u32 size() const noexcept { return size_; }
 
   Span<T> subspan(u32 const offset) const noexcept { return Span<T>{&at(offset), size_ - offset}; }
+  Span<T> reset(T *const data, u32 const size) const noexcept {
+    data_ = data;
+    size_ = size;
+  }
 
 private:
   T *data_;
@@ -37,6 +41,6 @@ public:
   }
 };
 
-}; // namespace embedded_serialization
+} // namespace embedded_serialization
 
 #endif
