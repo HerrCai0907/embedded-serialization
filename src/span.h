@@ -22,6 +22,10 @@ public:
   u32 size() const noexcept { return size_; }
 
   Span<T> subspan(u32 const offset) const noexcept { return Span<T>{&at(offset), size_ - offset}; }
+  void reset(T *const data, u32 const size) noexcept {
+    data_ = data;
+    size_ = size;
+  }
 
 private:
   T *data_;
@@ -37,6 +41,25 @@ public:
   }
 };
 
-}; // namespace embedded_serialization
+template <class T, u32 MinSize, u32 MaxSize>
+bool operator==(SerializedSpan<T, MinSize, MaxSize> const &lhs,
+                SerializedSpan<T, MinSize, MaxSize> const &rhs) noexcept {
+  if (lhs.size() != rhs.size()) {
+    return false;
+  }
+  for (u32 i = 0U; i < lhs.size(); ++i) {
+    if (lhs[i] != rhs[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+template <class T, u32 MinSize, u32 MaxSize>
+bool operator!=(SerializedSpan<T, MinSize, MaxSize> const &lhs,
+                SerializedSpan<T, MinSize, MaxSize> const &rhs) noexcept {
+  return !(lhs == rhs);
+}
+
+} // namespace embedded_serialization
 
 #endif

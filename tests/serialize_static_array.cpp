@@ -17,8 +17,8 @@ TEST(serialize_static_array, u32) {
   std::array<u32, 4> rawdata{1, 2, 3, 4};
   auto data = std::make_tuple(embedded_serialization::SerializedSpan<u32, 4U, 4U>{rawdata.data(), rawdata.size()});
 
-  auto length = embedded_serialization::serialization(data, data_span);
-  EXPECT_EQ(embedded_serialization::get_size(data), length);
+  auto serialize_length = embedded_serialization::serialization(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), serialize_length);
 
   std::array<u8, 32> expect_data_area{};
   u32 offset = 0U;
@@ -43,8 +43,16 @@ TEST(serialize_static_array, u32) {
   expect_data_area[offset++] = 0x00;
   expect_data_area[offset++] = 0x00;
 
-  EXPECT_EQ(length, offset);
+  EXPECT_EQ(serialize_length, offset);
   EXPECT_EQ(data_area, expect_data_area);
+
+  embedded_serialization::Span<u8> const data_span_const{data_area.data(), data_area.size()};
+  std::array<u32, 4> outData{};
+  decltype(data) out =
+      std::make_tuple(embedded_serialization::SerializedSpan<u32, 4U, 4U>{outData.data(), outData.size()});
+  auto deserialize_length = embedded_serialization::deserialization(data_span_const, out);
+  EXPECT_EQ(embedded_serialization::get_size(data), deserialize_length);
+  EXPECT_EQ(data, out);
 }
 
 TEST(serialize_static_array, u8) {
@@ -54,8 +62,8 @@ TEST(serialize_static_array, u8) {
   std::array<u8, 4> rawdata{1, 2, 3, 4};
   auto data = std::make_tuple(embedded_serialization::SerializedSpan<u8, 4U, 4U>{rawdata.data(), rawdata.size()});
 
-  auto length = embedded_serialization::serialization(data, data_span);
-  EXPECT_EQ(embedded_serialization::get_size(data), length);
+  auto serialize_length = embedded_serialization::serialization(data, data_span);
+  EXPECT_EQ(embedded_serialization::get_size(data), serialize_length);
 
   std::array<u8, 32> expect_data_area{};
   u32 offset = 0U;
@@ -68,6 +76,14 @@ TEST(serialize_static_array, u8) {
   // element 4
   expect_data_area[offset++] = 0x04;
 
-  EXPECT_EQ(length, offset);
+  EXPECT_EQ(serialize_length, offset);
   EXPECT_EQ(data_area, expect_data_area);
+
+  embedded_serialization::Span<u8> const data_span_const{data_area.data(), data_area.size()};
+  std::array<u8, 4> outData{};
+  decltype(data) out =
+      std::make_tuple(embedded_serialization::SerializedSpan<u8, 4U, 4U>{outData.data(), outData.size()});
+  auto deserialize_length = embedded_serialization::deserialization(data_span_const, out);
+  EXPECT_EQ(embedded_serialization::get_size(data), deserialize_length);
+  EXPECT_EQ(data, out);
 }

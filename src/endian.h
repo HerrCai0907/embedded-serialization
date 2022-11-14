@@ -28,6 +28,6 @@ struct BigEndian {};
 struct LittleEndian {};
 struct UnknownEndian {};
 
-}; // namespace embedded_serialization
+} // namespace embedded_serialization
 
 #endif

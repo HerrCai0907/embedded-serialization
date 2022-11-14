@@ -46,6 +46,14 @@ TEST(serialize_dyn_array, u32) {
 
   EXPECT_EQ(length, offset);
   EXPECT_EQ(data_area, expect_data_area);
+
+  embedded_serialization::Span<u8> const data_span_const{data_area.data(), data_area.size()};
+  std::array<u32, 4> outData{};
+  decltype(data) out =
+      std::make_tuple(embedded_serialization::SerializedSpan<u32, 0U, 256U>{outData.data(), outData.size()});
+  auto deserialize_length = embedded_serialization::deserialization(data_span_const, out);
+  EXPECT_EQ(embedded_serialization::get_size(data), deserialize_length);
+  EXPECT_EQ(data, out);
 }
 
 TEST(serialize_dyn_array, u8) {
@@ -71,4 +79,12 @@ TEST(serialize_dyn_array, u8) {
 
   EXPECT_EQ(length, offset);
   EXPECT_EQ(data_area, expect_data_area);
+
+  embedded_serialization::Span<u8> const data_span_const{data_area.data(), data_area.size()};
+  std::array<u8, 4> outData{};
+  decltype(data) out =
+      std::make_tuple(embedded_serialization::SerializedSpan<u8, 0U, 6U>{outData.data(), outData.size()});
+  auto deserialize_length = embedded_serialization::deserialization(data_span_const, out);
+  EXPECT_EQ(embedded_serialization::get_size(data), deserialize_length);
+  EXPECT_EQ(data, out);
 }
