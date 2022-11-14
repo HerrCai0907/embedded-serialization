@@ -11,7 +11,7 @@ serialization library for embedded device (header only)
 
 | type          | format                           |
 | ------------- | -------------------------------- |
-| u8            | 1 bytes little endian data       |
+| u8            | 1 byte                           |
 | u16           | 2 bytes little endian data       |
 | u32           | 4 bytes little endian data       |
 | u64           | 8 bytes little endian data       |
