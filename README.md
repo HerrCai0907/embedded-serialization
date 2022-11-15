@@ -32,5 +32,6 @@ ctest --test-dir build
 or
 
 ```bash
-cmake -S . -B build -DENABLE_COV=on && cmake --build build --parallel && ctest --test-dir build
+bazel test //tests
+bazel coverage //tests && genhtml --branch-coverage "$(bazel info output_path)/_coverage/_coverage_report.dat" -o bazel-cov
 ```
