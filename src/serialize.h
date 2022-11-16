@@ -22,6 +22,8 @@ public:
 template <class Endian> class SerializeImpl<Endian, u8> {
 public:
   using SupportedType = std::true_type;
+  using DeserializedType = u8;
+  using FixedLengthElement = std::true_type;
   static inline u32 get_size(u8 const &data) noexcept { return 1U; }
   static inline u32 serialize(u8 const &data, Span<u8> data_area) noexcept {
     data_area[0U] = data;
@@ -60,6 +62,8 @@ public:
 template <> class SerializeImpl<UnknownEndian, u16> {
 public:
   using SupportedType = std::true_type;
+  using DeserializedType = u16;
+  using FixedLengthElement = std::true_type;
   static inline u32 get_size(u16 const &data) noexcept { return 2U; }
   static inline u32 serialize(u16 const &data, Span<u8> data_area) noexcept {
     if (EndianTest::isBigEndian()) {
@@ -107,6 +111,8 @@ public:
 template <> class SerializeImpl<UnknownEndian, u32> {
 public:
   using SupportedType = std::true_type;
+  using DeserializedType = u32;
+  using FixedLengthElement = std::true_type;
   static inline u32 get_size(u32 const &data) noexcept { return 4U; }
   static inline u32 serialize(u32 const &data, Span<u8> data_area) noexcept {
     if (EndianTest::isBigEndian()) {
@@ -160,6 +166,8 @@ public:
 template <> class SerializeImpl<UnknownEndian, u64> {
 public:
   using SupportedType = std::true_type;
+  using DeserializedType = u64;
+  using FixedLengthElement = std::true_type;
   static inline u32 get_size(u64 const &data) noexcept { return 8U; }
   static inline u32 serialize(u64 const &data, Span<u8> data_area) noexcept {
     if (EndianTest::isBigEndian()) {
@@ -179,9 +187,14 @@ public:
 template <class Endian, class T, u32 MinSize, u32 MaxSize>
 class SerializeImpl<Endian, SerializedSpan<T, MinSize, MaxSize>> {
   using SizeType = typename SizeTraits<static_cast<u64>(MaxSize)>::type;
+  using DeserializedSubType = typename SerializeImpl<Endian, T>::DeserializedType;
 
 public:
   using SupportedType = std::true_type;
+  using DeserializedType =
+      typename std::conditional<DeserializedSubType::FixedLengthElement::value, Span<DeserializedSubType>,
+                                std::array<DeserializedSubType *, MaxSize>>::type;
+  using FixedLengthElement = std::false_type;
   static inline u32 get_size(SerializedSpan<T, MinSize, MaxSize> const &data) noexcept {
     u32 size = sizeof(SizeType);
     for (u32 i = 0; i < data.size(); ++i) {
