@@ -27,6 +27,7 @@ TESTCASE(deserialized_type)
 TESTCASE(serialize_integer)
 TESTCASE(serialize_dyn_array)
 TESTCASE(serialize_static_array)
+TESTCASE(serialize_tuple)
 TESTCASE(size_traits)
 TESTCASE(span)
 
