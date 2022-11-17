@@ -1,4 +1,4 @@
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -23,9 +23,11 @@ function(TESTCASE test_name)
   set(TESTCASES ${TESTCASES} ${test_name} PARENT_SCOPE)
 endfunction()
 
+TESTCASE(deserialized_type)
 TESTCASE(serialize_integer)
 TESTCASE(serialize_dyn_array)
 TESTCASE(serialize_static_array)
+TESTCASE(serialize_tuple)
 TESTCASE(size_traits)
 TESTCASE(span)
 
