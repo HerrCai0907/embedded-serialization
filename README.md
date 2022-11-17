@@ -7,6 +7,13 @@
 
 serialization library for embedded device (header only)
 
+## How to use
+
+### cmake flag
+
+- EMBEDDED_SERIALIZATION_INTEGRATION: enable integration mode, will disable unittest and example
+- ENABLE_COV: enable code coverage analysis
+
 ## serialized bytes
 
 | type          | format                           |
