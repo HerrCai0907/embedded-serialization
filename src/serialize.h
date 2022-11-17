@@ -19,6 +19,8 @@ namespace detail {
 template <class BigEndian, class T> class SerializeImpl {
 public:
   using SupportedType = std::false_type;
+  using SupportedSpanContainer = std::true_type;
+  using DeserializedType = void;
 };
 
 // ██ ███    ██ ████████ ███████  ██████  ███████ ██████
@@ -226,12 +228,27 @@ public:
     }
     return offset;
   }
-  static inline u32 deserialize(Span<u8> const data_area, SerializedSpan<T, MinSize, MaxSize> &out) noexcept {
-    // TODO(handle nest span)
+  static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out) noexcept {
+    return deserialize(data_area, out, typename ElementImplType::SupportedSpanContainer{});
+  }
+
+private:
+  static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out,
+                                std::true_type isSpanContainer) noexcept {
     SizeType size{};
     u32 offset = SerializeImpl<Endian, SizeType>::deserialize(data_area, size);
     out.reset(reinterpret_cast<T *>(&data_area.at(offset)), size);
     return offset + size * sizeof(T);
+  }
+  static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out,
+                                std::false_type isSpanContainer) noexcept {
+    SizeType size{};
+    u32 offset = SerializeImpl<Endian, SizeType>::deserialize(data_area, size);
+    for (SizeType i = 0; i < size; ++i) {
+      u32 length = SerializeImpl<Endian, T>::deserialize(data_area.subspan(offset), out[i]);
+      offset += length;
+    }
+    return offset;
   }
 };
 template <class Endian, class T, u32 Size> class SerializeImpl<Endian, SerializedSpan<T, Size, Size>> {
@@ -259,10 +276,24 @@ public:
     }
     return offset;
   }
-  static inline u32 deserialize(Span<u8> const data_area, SerializedSpan<T, Size, Size> &out) noexcept {
-    // TODO(handle nest span)
+  static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out) noexcept {
+    return deserialize(data_area, out, typename ElementImplType::SupportedSpanContainer{});
+  }
+
+private:
+  static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out,
+                                std::true_type isSpanContainer) noexcept {
     out.reset(reinterpret_cast<T *>(&data_area.at(0)), Size);
     return Size * sizeof(T);
+  }
+  static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out,
+                                std::false_type isSpanContainer) noexcept {
+    u32 offset = 0;
+    for (u32 i = 0; i < Size; ++i) {
+      u32 length = SerializeImpl<Endian, T>::deserialize(data_area.subspan(offset), out[i]);
+      offset += length;
+    }
+    return offset;
   }
 };
 
@@ -293,11 +324,6 @@ template <class Endian, class... Args> class SerializeImpl<Endian, std::tuple<Ar
       u32 const other_length = TupleSerializeImpl<Start + 1, End>::serialize(data, data_area.subspan(length));
       return length + other_length;
     }
-    static inline u32 deserialize(Span<u8> const data_area, DataType &out) noexcept {
-      u32 const length = SerializeImpl<Endian, StartElementCleanType>::deserialize(data_area, std::get<Start>(out));
-      u32 const other_length = TupleSerializeImpl<Start + 1, End>::deserialize(data_area.subspan(length), out);
-      return length + other_length;
-    }
   };
   template <u32 End> class TupleSerializeImpl<End, End> {
   public:
@@ -311,11 +337,6 @@ template <class Endian, class... Args> class SerializeImpl<Endian, std::tuple<Ar
       static_cast<void>(data_area);
       return 0U;
     }
-    static inline u32 deserialize(Span<u8> const data_area, DataType &out) noexcept {
-      static_cast<void>(data_area);
-      static_cast<void>(out);
-      return 0U;
-    }
   };
 
 public:
@@ -323,14 +344,37 @@ public:
   using DeserializedType = typename TupleSerializeImpl<0U, std::tuple_size<DataType>::value>::RecursionDeserializedType;
   using SupportedSpanContainer = std::false_type;
 
+private:
+  template <u32 Start, u32 End> class TupleDeserializeImpl {
+    using StartElementType = typename std::tuple_element<Start, std::tuple<Args...>>::type;
+    using StartElementCleanType = typename std::remove_const<StartElementType>::type;
+
+  public:
+    static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out) noexcept {
+      u32 const length = SerializeImpl<Endian, StartElementCleanType>::deserialize(data_area, std::get<Start>(out));
+      u32 const other_length = TupleDeserializeImpl<Start + 1, End>::deserialize(data_area.subspan(length), out);
+      return length + other_length;
+    }
+  };
+
+  template <u32 End> class TupleDeserializeImpl<End, End> {
+  public:
+    static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out) noexcept {
+      static_cast<void>(data_area);
+      static_cast<void>(out);
+      return 0U;
+    }
+  };
+
+public:
   static inline u32 get_size(DataType const &data) noexcept {
     return TupleSerializeImpl<0U, std::tuple_size<DataType>::value>::get_size(data);
   }
   static inline u32 serialize(DataType const &data, Span<u8> data_area) noexcept {
     return TupleSerializeImpl<0U, std::tuple_size<DataType>::value>::serialize(data, data_area);
   }
-  static inline u32 deserialize(Span<u8> const data_area, DataType &out) noexcept {
-    return TupleSerializeImpl<0U, std::tuple_size<DataType>::value>::deserialize(data_area, out);
+  static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out) noexcept {
+    return TupleDeserializeImpl<0U, std::tuple_size<DataType>::value>::deserialize(data_area, out);
   }
 };
 
@@ -344,13 +388,14 @@ public:
 template <class T> u32 get_size(T const &data) noexcept {
   return detail::SerializeImpl<UnknownEndian, T>::get_size(data);
 }
-template <class Endian = UnknownEndian, class T> u32 serialization(T const &data, Span<u8> const data_area) noexcept {
+template <class T, class Endian = UnknownEndian> u32 serialization(T const &data, Span<u8> const data_area) noexcept {
   // LCOV_EXCL_START
   assert(data_area.size() >= get_size(data) && "data size not enough");
   // LCOV_EXCL_STOP
   return detail::SerializeImpl<Endian, T>::serialize(data, data_area);
 }
-template <class Endian = UnknownEndian, class T> u32 deserialization(Span<u8> const data_area, T &out) noexcept {
+template <class T, class Endian = UnknownEndian>
+u32 deserialization(Span<u8> const data_area, typename DeserializedType<T>::type &out) noexcept {
   return detail::SerializeImpl<Endian, T>::deserialize(data_area, out);
 }
 
