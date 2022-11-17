@@ -7,6 +7,31 @@
 
 serialization library for embedded device (header only)
 
+## How to use
+
+### API
+
+```c++
+
+template <class T> class DeserializedType {
+public:
+  using type = typename detail::SerializeImpl<UnknownEndian, T>::DeserializedType;
+};
+template <class T> u32 get_size(T const &data) noexcept;
+template <class T, class Endian = UnknownEndian> u32 serialization(T const &data, Span<u8> const data_area) noexcept ;
+template <class T, class Endian = UnknownEndian>
+u32 deserialization(Span<u8> const data_area, typename DeserializedType<T>::type &out) noexcept;
+```
+
+### example
+
+[demo code](example/main.cpp)
+
+### cmake flag
+
+- EMBEDDED_SERIALIZATION_INTEGRATION: enable integration mode, will disable unittest and example
+- ENABLE_COV: enable code coverage analysis
+
 ## serialized bytes
 
 | type          | format                           |

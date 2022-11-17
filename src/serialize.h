@@ -19,7 +19,7 @@ namespace detail {
 template <class BigEndian, class T> class SerializeImpl {
 public:
   using SupportedType = std::false_type;
-  using SupportedSpanContainer = std::true_type;
+  using SupportedSpanContainer = void;
   using DeserializedType = void;
 };
 
@@ -204,7 +204,8 @@ public:
 template <class Endian, class T, u32 MinSize, u32 MaxSize>
 class SerializeImpl<Endian, SerializedSpan<T, MinSize, MaxSize>> {
   using SizeType = typename SizeTraits<static_cast<u64>(MaxSize)>::type;
-  using ElementImplType = SerializeImpl<UnknownEndian, T>;
+  using CleanType = typename std::remove_const<T>::type;
+  using ElementImplType = SerializeImpl<UnknownEndian, CleanType>;
 
 public:
   using SupportedType = std::true_type;
@@ -216,14 +217,14 @@ public:
   static inline u32 get_size(SerializedSpan<T, MinSize, MaxSize> const &data) noexcept {
     u32 size = sizeof(SizeType);
     for (u32 i = 0; i < data.size(); ++i) {
-      size += SerializeImpl<Endian, T>::get_size(data[i]);
+      size += SerializeImpl<Endian, CleanType>::get_size(data[i]);
     }
     return size;
   }
   static inline u32 serialize(SerializedSpan<T, MinSize, MaxSize> const &data, Span<u8> data_area) noexcept {
     u32 offset = SerializeImpl<Endian, SizeType>::serialize(data.size(), data_area);
     for (uint32_t i = 0; i < data.size(); ++i) {
-      u32 length = SerializeImpl<Endian, T>::serialize(data[i], data_area.subspan(offset));
+      u32 length = SerializeImpl<Endian, CleanType>::serialize(data[i], data_area.subspan(offset));
       offset += length;
     }
     return offset;
@@ -237,7 +238,7 @@ private:
                                 std::true_type isSpanContainer) noexcept {
     SizeType size{};
     u32 offset = SerializeImpl<Endian, SizeType>::deserialize(data_area, size);
-    out.reset(reinterpret_cast<T *>(&data_area.at(offset)), size);
+    out.reset(reinterpret_cast<CleanType *>(&data_area.at(offset)), size);
     return offset + size * sizeof(T);
   }
   static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out,
@@ -245,14 +246,15 @@ private:
     SizeType size{};
     u32 offset = SerializeImpl<Endian, SizeType>::deserialize(data_area, size);
     for (SizeType i = 0; i < size; ++i) {
-      u32 length = SerializeImpl<Endian, T>::deserialize(data_area.subspan(offset), out[i]);
+      u32 length = SerializeImpl<Endian, CleanType>::deserialize(data_area.subspan(offset), out[i]);
       offset += length;
     }
     return offset;
   }
 };
 template <class Endian, class T, u32 Size> class SerializeImpl<Endian, SerializedSpan<T, Size, Size>> {
-  using ElementImplType = SerializeImpl<UnknownEndian, T>;
+  using CleanType = typename std::remove_const<T>::type;
+  using ElementImplType = SerializeImpl<UnknownEndian, CleanType>;
 
 public:
   using SupportedType = std::true_type;
@@ -264,14 +266,14 @@ public:
   static inline u32 get_size(SerializedSpan<T, Size, Size> const &data) noexcept {
     u32 size = 0;
     for (u32 i = 0; i < data.size(); ++i) {
-      size += SerializeImpl<Endian, T>::get_size(data[i]);
+      size += SerializeImpl<Endian, CleanType>::get_size(data[i]);
     }
     return size;
   }
   static inline u32 serialize(SerializedSpan<T, Size, Size> const &data, Span<u8> data_area) noexcept {
     u32 offset = 0;
     for (uint32_t i = 0; i < Size; ++i) {
-      u32 length = SerializeImpl<Endian, T>::serialize(data[i], data_area.subspan(offset));
+      u32 length = SerializeImpl<Endian, CleanType>::serialize(data[i], data_area.subspan(offset));
       offset += length;
     }
     return offset;
@@ -283,14 +285,14 @@ public:
 private:
   static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out,
                                 std::true_type isSpanContainer) noexcept {
-    out.reset(reinterpret_cast<T *>(&data_area.at(0)), Size);
+    out.reset(reinterpret_cast<CleanType *>(&data_area.at(0)), Size);
     return Size * sizeof(T);
   }
   static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out,
                                 std::false_type isSpanContainer) noexcept {
     u32 offset = 0;
     for (u32 i = 0; i < Size; ++i) {
-      u32 length = SerializeImpl<Endian, T>::deserialize(data_area.subspan(offset), out[i]);
+      u32 length = SerializeImpl<Endian, CleanType>::deserialize(data_area.subspan(offset), out[i]);
       offset += length;
     }
     return offset;

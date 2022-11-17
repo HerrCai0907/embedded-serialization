@@ -1,4 +1,5 @@
 set(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_FLAGS "-Wall")
 
 include(FetchContent)
 FetchContent_Declare(
@@ -10,7 +11,6 @@ set(gtest_force_shared_crt
   CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-include_directories(${CMAKE_SOURCE_DIR}/src)
 include(GoogleTest)
 
 set(TESTCASES)
