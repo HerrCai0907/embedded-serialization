@@ -34,6 +34,7 @@ private:
 
 template <class T, u32 MinSize, u32 MaxSize> class SerializedSpan : public Span<T> {
 public:
+  SerializedSpan() noexcept : Span<T>() {}
   SerializedSpan(T *const data, u32 const size) noexcept : Span<T>(data, size) {
     // LCOV_EXCL_START
     assert(size >= MinSize && size <= MaxSize);
