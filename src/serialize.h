@@ -39,7 +39,7 @@ public:
     data_area[0U] = data;
     return 1U;
   }
-  static inline u32 deserialize(Span<u8> const data_area, u8 &out) noexcept {
+  static inline u32 deserialize(Span<const u8> const data_area, u8 &out) noexcept {
     out = data_area.at(0U);
     return 1U;
   }
@@ -52,7 +52,7 @@ public:
     data_area[1U] = static_cast<u8>((data & static_cast<u16>(0xff00U)) >> 8U);
     return 2U;
   }
-  static inline u32 deserialize(Span<u8> const data_area, u16 &out) noexcept {
+  static inline u32 deserialize(Span<const u8> const data_area, u16 &out) noexcept {
     out = static_cast<u16>((static_cast<u32>(data_area.at(1U)) << 8U) + static_cast<u32>(data_area.at(0U)));
     return 2U;
   }
@@ -64,7 +64,7 @@ public:
     std::memcpy(&data_area[0], &data, 2U);
     return 2U;
   }
-  static inline u32 deserialize(Span<u8> const data_area, u16 &out) noexcept {
+  static inline u32 deserialize(Span<const u8> const data_area, u16 &out) noexcept {
     std::memcpy(&out, &data_area[0], 2U);
     return 2U;
   }
@@ -82,7 +82,7 @@ public:
       return SerializeImpl<LittleEndian, u16>::serialize(data, data_area);
     }
   }
-  static inline u32 deserialize(Span<u8> const data_area, u16 &out) noexcept {
+  static inline u32 deserialize(Span<const u8> const data_area, u16 &out) noexcept {
     if (EndianTest::isBigEndian()) {
       return SerializeImpl<BigEndian, u16>::deserialize(data_area, out);
     } else {
@@ -100,7 +100,7 @@ public:
     data_area[3U] = static_cast<u8>((data & static_cast<u32>(0xff000000U)) >> 24U);
     return 4U;
   }
-  static inline u32 deserialize(Span<u8> const data_area, u32 &out) noexcept {
+  static inline u32 deserialize(Span<const u8> const data_area, u32 &out) noexcept {
     out = static_cast<u32>(data_area.at(0U)) + (static_cast<u32>(data_area.at(1U)) << 8U) +
           (static_cast<u32>(data_area.at(2U)) << 16U) + (static_cast<u32>(data_area.at(3U)) << 24U);
     return 4U;
@@ -113,7 +113,7 @@ public:
     std::memcpy(&data_area[0], &data, 4U);
     return 4U;
   }
-  static inline u32 deserialize(Span<u8> const data_area, u32 &out) noexcept {
+  static inline u32 deserialize(Span<const u8> const data_area, u32 &out) noexcept {
     std::memcpy(&out, &data_area[0], 4U);
     return 4U;
   }
@@ -131,7 +131,7 @@ public:
       return SerializeImpl<LittleEndian, u32>::serialize(data, data_area);
     }
   }
-  static inline u32 deserialize(Span<u8> const data_area, u32 &out) noexcept {
+  static inline u32 deserialize(Span<const u8> const data_area, u32 &out) noexcept {
     if (EndianTest::isBigEndian()) {
       return SerializeImpl<BigEndian, u32>::deserialize(data_area, out);
     } else {
@@ -153,7 +153,7 @@ public:
     data_area[7U] = static_cast<u8>((data & static_cast<u64>(0xff00000000000000U)) >> 56U);
     return 8U;
   }
-  static inline u32 deserialize(Span<u8> const data_area, u64 &out) noexcept {
+  static inline u32 deserialize(Span<const u8> const data_area, u64 &out) noexcept {
     out = static_cast<u64>(data_area.at(0U)) + (static_cast<u64>(data_area.at(1U)) << 8U) +
           (static_cast<u64>(data_area.at(2U)) << 16U) + (static_cast<u64>(data_area.at(3U)) << 24U) +
           (static_cast<u64>(data_area.at(4U)) << 32U) + (static_cast<u64>(data_area.at(5U)) << 40U) +
@@ -168,7 +168,7 @@ public:
     std::memcpy(&data_area[0], &data, 8U);
     return 8U;
   }
-  static inline u32 deserialize(Span<u8> const data_area, u64 &out) noexcept {
+  static inline u32 deserialize(Span<const u8> const data_area, u64 &out) noexcept {
     std::memcpy(&out, &data_area[0], 8U);
     return 8U;
   }
@@ -186,7 +186,7 @@ public:
       return SerializeImpl<LittleEndian, u64>::serialize(data, data_area);
     }
   }
-  static inline u32 deserialize(Span<u8> const data_area, u64 &out) noexcept {
+  static inline u32 deserialize(Span<const u8> const data_area, u64 &out) noexcept {
     if (EndianTest::isBigEndian()) {
       return SerializeImpl<BigEndian, u64>::deserialize(data_area, out);
     } else {
@@ -212,7 +212,7 @@ public:
   using SupportedSpanContainer = std::false_type;
   using DeserializedType =
       typename std::conditional<ElementImplType::SupportedSpanContainer::value,
-                                SerializedSpan<typename ElementImplType::DeserializedType, MinSize, MaxSize>,
+                                SerializedSpan<const typename ElementImplType::DeserializedType, MinSize, MaxSize>,
                                 std::array<typename ElementImplType::DeserializedType, MaxSize>>::type;
   static inline u32 get_size(SerializedSpan<T, MinSize, MaxSize> const &data) noexcept {
     u32 size = sizeof(SizeType);
@@ -229,19 +229,19 @@ public:
     }
     return offset;
   }
-  static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out) noexcept {
+  static inline u32 deserialize(Span<const u8> const data_area, DeserializedType &out) noexcept {
     return deserialize(data_area, out, typename ElementImplType::SupportedSpanContainer{});
   }
 
 private:
-  static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out,
+  static inline u32 deserialize(Span<const u8> const data_area, DeserializedType &out,
                                 std::true_type isSpanContainer) noexcept {
     SizeType size{};
     u32 offset = SerializeImpl<Endian, SizeType>::deserialize(data_area, size);
-    out.reset(reinterpret_cast<CleanType *>(&data_area.at(offset)), size);
+    out.reset(reinterpret_cast<const typename ElementImplType::DeserializedType *>(&data_area.at(offset)), size);
     return offset + size * sizeof(T);
   }
-  static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out,
+  static inline u32 deserialize(Span<const u8> const data_area, DeserializedType &out,
                                 std::false_type isSpanContainer) noexcept {
     SizeType size{};
     u32 offset = SerializeImpl<Endian, SizeType>::deserialize(data_area, size);
@@ -261,7 +261,7 @@ public:
   using SupportedSpanContainer = std::false_type;
   using DeserializedType =
       typename std::conditional<ElementImplType::SupportedSpanContainer::value,
-                                SerializedSpan<typename ElementImplType::DeserializedType, Size, Size>,
+                                SerializedSpan<const typename ElementImplType::DeserializedType, Size, Size>,
                                 std::array<typename ElementImplType::DeserializedType, Size>>::type;
   static inline u32 get_size(SerializedSpan<T, Size, Size> const &data) noexcept {
     u32 size = 0;
@@ -278,17 +278,17 @@ public:
     }
     return offset;
   }
-  static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out) noexcept {
+  static inline u32 deserialize(Span<const u8> const data_area, DeserializedType &out) noexcept {
     return deserialize(data_area, out, typename ElementImplType::SupportedSpanContainer{});
   }
 
 private:
-  static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out,
+  static inline u32 deserialize(Span<const u8> const data_area, DeserializedType &out,
                                 std::true_type isSpanContainer) noexcept {
-    out.reset(reinterpret_cast<CleanType *>(&data_area.at(0)), Size);
+    out.reset(reinterpret_cast<const typename ElementImplType::DeserializedType *>(&data_area.at(0)), Size);
     return Size * sizeof(T);
   }
-  static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out,
+  static inline u32 deserialize(Span<const u8> const data_area, DeserializedType &out,
                                 std::false_type isSpanContainer) noexcept {
     u32 offset = 0;
     for (u32 i = 0; i < Size; ++i) {
@@ -352,7 +352,7 @@ private:
     using StartElementCleanType = typename std::remove_const<StartElementType>::type;
 
   public:
-    static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out) noexcept {
+    static inline u32 deserialize(Span<const u8> const data_area, DeserializedType &out) noexcept {
       u32 const length = SerializeImpl<Endian, StartElementCleanType>::deserialize(data_area, std::get<Start>(out));
       u32 const other_length = TupleDeserializeImpl<Start + 1, End>::deserialize(data_area.subspan(length), out);
       return length + other_length;
@@ -361,7 +361,7 @@ private:
 
   template <u32 End> class TupleDeserializeImpl<End, End> {
   public:
-    static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out) noexcept {
+    static inline u32 deserialize(Span<const u8> const data_area, DeserializedType &out) noexcept {
       static_cast<void>(data_area);
       static_cast<void>(out);
       return 0U;
@@ -375,7 +375,7 @@ public:
   static inline u32 serialize(DataType const &data, Span<u8> data_area) noexcept {
     return TupleSerializeImpl<0U, std::tuple_size<DataType>::value>::serialize(data, data_area);
   }
-  static inline u32 deserialize(Span<u8> const data_area, DeserializedType &out) noexcept {
+  static inline u32 deserialize(Span<const u8> const data_area, DeserializedType &out) noexcept {
     return TupleDeserializeImpl<0U, std::tuple_size<DataType>::value>::deserialize(data_area, out);
   }
 };
@@ -397,7 +397,7 @@ template <class T, class Endian = UnknownEndian> u32 serialization(T const &data
   return detail::SerializeImpl<Endian, T>::serialize(data, data_area);
 }
 template <class T, class Endian = UnknownEndian>
-u32 deserialization(Span<u8> const data_area, typename DeserializedType<T>::type &out) noexcept {
+u32 deserialization(Span<const u8> const data_area, typename DeserializedType<T>::type &out) noexcept {
   return detail::SerializeImpl<Endian, T>::deserialize(data_area, out);
 }
 

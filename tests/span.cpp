@@ -22,3 +22,10 @@ TEST(span, ne_size) {
   embedded_serialization::SerializedSpan<int, 2U, 4U> span2{&data[4U], 3U};
   EXPECT_NE(span1, span2);
 }
+
+TEST(span, cast_from_non_const) {
+  std::array<int, 8U> data{1, 2, 3, 4};
+  embedded_serialization::SerializedSpan<int, 2U, 4U> span1{&data[0U], 4U};
+  embedded_serialization::SerializedSpan<const int, 2U, 4U> span2{span1};
+  span2 = span1;
+}
