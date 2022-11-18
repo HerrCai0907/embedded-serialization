@@ -3,12 +3,20 @@
 
 #include "type.h"
 #include <cassert>
+#include <type_traits>
+
 namespace embedded_serialization {
 
 template <class T> class Span {
 public:
   Span() noexcept : data_(nullptr), size_(0U) {}
   Span(T *const data, u32 const size) noexcept : data_(data), size_(size) {}
+  Span(Span<typename std::remove_const<T>::type> const &v) noexcept : data_(v.data_), size_(v.size_) {}
+  Span &operator=(Span<typename std::remove_const<T>::type> const &v) noexcept {
+    this->data_ = v.data();
+    this->size_ = v.size();
+    return *this;
+  }
 
   T &operator[](u32 const index) const noexcept { return data_[index]; }
   T &at(u32 const index) const noexcept {
@@ -27,7 +35,7 @@ public:
     size_ = size;
   }
 
-private:
+protected:
   T *data_;
   u32 size_;
 };
@@ -39,6 +47,13 @@ public:
     // LCOV_EXCL_START
     assert(size >= MinSize && size <= MaxSize);
     // LCOV_EXCL_STOP
+  }
+  SerializedSpan(SerializedSpan<typename std::remove_const<T>::type, MinSize, MaxSize> const &v) noexcept
+      : Span<T>(v.data(), v.size()) {}
+  SerializedSpan &operator=(SerializedSpan<typename std::remove_const<T>::type, MinSize, MaxSize> const &v) noexcept {
+    this->data_ = v.data();
+    this->size_ = v.size();
+    return *this;
   }
 };
 
