@@ -54,6 +54,16 @@ cc_test(
 )
 
 cc_test(
+    name = "serialize_user_defined",
+    size = "small",
+    srcs = ["serialize_user_defined.cpp"],
+    deps = [
+        "//:embedded_serialization_inner",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "size_traits",
     size = "small",
     srcs = ["size_traits.cpp"],
