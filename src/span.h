@@ -42,6 +42,7 @@ protected:
 
 template <class T, u32 MinSize, u32 MaxSize> class SerializedSpan : public Span<T> {
 public:
+  using iterator = T *;
   SerializedSpan() noexcept : Span<T>() {}
   SerializedSpan(T *const data, u32 const size) noexcept : Span<T>(data, size) {
     // LCOV_EXCL_START
@@ -55,6 +56,8 @@ public:
     this->size_ = v.size();
     return *this;
   }
+  iterator begin() const noexcept { return &this->data_[0]; }
+  iterator end() const noexcept { return &this->data_[this->size_]; }
 };
 
 template <class T, class U, u32 MinSize, u32 MaxSize>

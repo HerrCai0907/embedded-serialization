@@ -25,7 +25,9 @@ u32 deserialization(Span<u8> const data_area, typename DeserializedType<T>::type
 
 ### example
 
-[demo code](example/main.cpp)
+[tuple example code](example/tuple_example.cpp)
+
+[**class example** code (better)](example/tuple_example.cpp)
 
 ### cmake flag
 
