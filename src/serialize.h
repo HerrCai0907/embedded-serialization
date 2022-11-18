@@ -212,7 +212,7 @@ public:
   using SupportedSpanContainer = std::false_type;
   using DeserializedType =
       typename std::conditional<ElementImplType::SupportedSpanContainer::value,
-                                SerializedSpan<typename ElementImplType::DeserializedType, MinSize, MaxSize>,
+                                SerializedSpan<const typename ElementImplType::DeserializedType, MinSize, MaxSize>,
                                 std::array<typename ElementImplType::DeserializedType, MaxSize>>::type;
   static inline u32 get_size(SerializedSpan<T, MinSize, MaxSize> const &data) noexcept {
     u32 size = sizeof(SizeType);
@@ -261,7 +261,7 @@ public:
   using SupportedSpanContainer = std::false_type;
   using DeserializedType =
       typename std::conditional<ElementImplType::SupportedSpanContainer::value,
-                                SerializedSpan<typename ElementImplType::DeserializedType, Size, Size>,
+                                SerializedSpan<const typename ElementImplType::DeserializedType, Size, Size>,
                                 std::array<typename ElementImplType::DeserializedType, Size>>::type;
   static inline u32 get_size(SerializedSpan<T, Size, Size> const &data) noexcept {
     u32 size = 0;

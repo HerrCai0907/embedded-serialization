@@ -57,9 +57,9 @@ public:
   }
 };
 
-template <class T, u32 MinSize, u32 MaxSize>
+template <class T, class U, u32 MinSize, u32 MaxSize>
 bool operator==(SerializedSpan<T, MinSize, MaxSize> const &lhs,
-                SerializedSpan<T, MinSize, MaxSize> const &rhs) noexcept {
+                SerializedSpan<U, MinSize, MaxSize> const &rhs) noexcept {
   if (lhs.size() != rhs.size()) {
     return false;
   }
@@ -70,9 +70,9 @@ bool operator==(SerializedSpan<T, MinSize, MaxSize> const &lhs,
   }
   return true;
 }
-template <class T, u32 MinSize, u32 MaxSize>
+template <class T, class U, u32 MinSize, u32 MaxSize>
 bool operator!=(SerializedSpan<T, MinSize, MaxSize> const &lhs,
-                SerializedSpan<T, MinSize, MaxSize> const &rhs) noexcept {
+                SerializedSpan<U, MinSize, MaxSize> const &rhs) noexcept {
   return !(lhs == rhs);
 }
 
