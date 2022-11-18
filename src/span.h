@@ -11,7 +11,7 @@ template <class T> class Span {
 public:
   Span() noexcept : data_(nullptr), size_(0U) {}
   Span(T *const data, u32 const size) noexcept : data_(data), size_(size) {}
-  Span(Span<typename std::remove_const<T>::type> const &v) noexcept : data_(v.data_), size_(v.size_) {}
+  Span(Span<typename std::remove_const<T>::type> const &v) noexcept : data_(v.data()), size_(v.size()) {}
   Span &operator=(Span<typename std::remove_const<T>::type> const &v) noexcept {
     this->data_ = v.data();
     this->size_ = v.size();
