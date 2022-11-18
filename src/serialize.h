@@ -55,8 +55,8 @@ template <> class SerializeImpl<BigEndian, u16> {
 public:
   using SupportedType = std::true_type;
   static inline u32 serialize(u16 const &data, Span<u8> const data_area) noexcept {
-    data_area[0U] = static_cast<u8>(data & static_cast<u16>(0x00ffU));
-    data_area[1U] = static_cast<u8>((data & static_cast<u16>(0xff00U)) >> 8U);
+    data_area[0U] = static_cast<u8>(data);
+    data_area[1U] = static_cast<u8>(data >> 8U);
     return 2U;
   }
   static inline u32 deserialize(Span<const u8> const data_area, u16 &out) noexcept {
@@ -101,15 +101,24 @@ template <> class SerializeImpl<BigEndian, u32> {
 public:
   using SupportedType = std::true_type;
   static inline u32 serialize(u32 const &data, Span<u8> const data_area) noexcept {
-    data_area[0U] = static_cast<u8>(data & static_cast<u32>(0x000000ffU));
-    data_area[1U] = static_cast<u8>((data & static_cast<u32>(0x0000ff00U)) >> 8U);
-    data_area[2U] = static_cast<u8>((data & static_cast<u32>(0x00ff0000U)) >> 16U);
-    data_area[3U] = static_cast<u8>((data & static_cast<u32>(0xff000000U)) >> 24U);
+    u32 v = data;
+    data_area[0U] = static_cast<u8>(v);
+    v >>= 8U;
+    data_area[1U] = static_cast<u8>(v);
+    v >>= 8U;
+    data_area[2U] = static_cast<u8>(v);
+    v >>= 8U;
+    data_area[3U] = static_cast<u8>(v);
     return 4U;
   }
   static inline u32 deserialize(Span<const u8> const data_area, u32 &out) noexcept {
-    out = static_cast<u32>(data_area.at(0U)) + (static_cast<u32>(data_area.at(1U)) << 8U) +
-          (static_cast<u32>(data_area.at(2U)) << 16U) + (static_cast<u32>(data_area.at(3U)) << 24U);
+    out = static_cast<u32>(data_area.at(3U));
+    out <<= 8U;
+    out += static_cast<u32>(data_area.at(2U));
+    out <<= 8U;
+    out += static_cast<u32>(data_area.at(1U));
+    out <<= 8U;
+    out += static_cast<u32>(data_area.at(0U));
     return 4U;
   }
 };
@@ -150,21 +159,40 @@ template <> class SerializeImpl<BigEndian, u64> {
 public:
   using SupportedType = std::true_type;
   static inline u32 serialize(u64 const &data, Span<u8> const data_area) noexcept {
-    data_area[0U] = static_cast<u8>(data & static_cast<u64>(0x00000000000000ffU));
-    data_area[1U] = static_cast<u8>((data & static_cast<u64>(0x000000000000ff00U)) >> 8U);
-    data_area[2U] = static_cast<u8>((data & static_cast<u64>(0x0000000000ff0000U)) >> 16U);
-    data_area[3U] = static_cast<u8>((data & static_cast<u64>(0x00000000ff000000U)) >> 24U);
-    data_area[4U] = static_cast<u8>((data & static_cast<u64>(0x000000ff00000000U)) >> 32U);
-    data_area[5U] = static_cast<u8>((data & static_cast<u64>(0x0000ff0000000000U)) >> 40U);
-    data_area[6U] = static_cast<u8>((data & static_cast<u64>(0x00ff000000000000U)) >> 48U);
-    data_area[7U] = static_cast<u8>((data & static_cast<u64>(0xff00000000000000U)) >> 56U);
+    u64 v = data;
+    data_area[0U] = static_cast<u8>(v);
+    v >>= 8U;
+    data_area[1U] = static_cast<u8>(v);
+    v >>= 8U;
+    data_area[2U] = static_cast<u8>(v);
+    v >>= 8U;
+    data_area[3U] = static_cast<u8>(v);
+    v >>= 8U;
+    data_area[4U] = static_cast<u8>(v);
+    v >>= 8U;
+    data_area[5U] = static_cast<u8>(v);
+    v >>= 8U;
+    data_area[6U] = static_cast<u8>(v);
+    v >>= 8U;
+    data_area[7U] = static_cast<u8>(v);
     return 8U;
   }
   static inline u32 deserialize(Span<const u8> const data_area, u64 &out) noexcept {
-    out = static_cast<u64>(data_area.at(0U)) + (static_cast<u64>(data_area.at(1U)) << 8U) +
-          (static_cast<u64>(data_area.at(2U)) << 16U) + (static_cast<u64>(data_area.at(3U)) << 24U) +
-          (static_cast<u64>(data_area.at(4U)) << 32U) + (static_cast<u64>(data_area.at(5U)) << 40U) +
-          (static_cast<u64>(data_area.at(6U)) << 48U) + (static_cast<u64>(data_area.at(7U)) << 56U);
+    out = static_cast<u32>(data_area.at(7U));
+    out <<= 8U;
+    out += static_cast<u32>(data_area.at(6U));
+    out <<= 8U;
+    out += static_cast<u32>(data_area.at(5U));
+    out <<= 8U;
+    out += static_cast<u32>(data_area.at(4U));
+    out <<= 8U;
+    out += static_cast<u32>(data_area.at(3U));
+    out <<= 8U;
+    out += static_cast<u32>(data_area.at(2U));
+    out <<= 8U;
+    out += static_cast<u32>(data_area.at(1U));
+    out <<= 8U;
+    out += static_cast<u32>(data_area.at(0U));
     return 8U;
   }
 };
