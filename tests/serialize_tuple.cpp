@@ -4,6 +4,7 @@
 
 using namespace embedded_serialization;
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, tuple) {
   std::array<u8, 16> data_area{};
   Span<u8> data_span{data_area.data(), data_area.size()};

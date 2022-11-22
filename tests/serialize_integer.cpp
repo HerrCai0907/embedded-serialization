@@ -8,6 +8,7 @@ using u32 = uint32_t;
 using u16 = uint16_t;
 using u8 = uint8_t;
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, const_type) {
   std::array<u8, 16> data_area{};
   embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};
@@ -30,6 +31,7 @@ TEST(serialize_integer, const_type) {
 // ██    ██ ██    ██      ██
 //  ██████   ██████       ██
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, u64) {
   std::array<u8, 16> data_area{};
   embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};
@@ -60,6 +62,7 @@ TEST(serialize_integer, u64) {
   EXPECT_EQ(data, out);
 }
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, big_endian_u64) {
   std::array<u8, 16> data_area{};
   embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};
@@ -92,6 +95,7 @@ TEST(serialize_integer, big_endian_u64) {
   EXPECT_EQ(data, out);
 }
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, little_endian_u64) {
   std::array<u8, 16> data_area{};
   embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};
@@ -131,6 +135,7 @@ TEST(serialize_integer, little_endian_u64) {
 // ██    ██      ██ ██
 //  ██████  ██████  ███████
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, u32) {
   std::array<u8, 16> data_area{};
   embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};
@@ -159,6 +164,7 @@ TEST(serialize_integer, u32) {
   EXPECT_EQ(data, out);
 }
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, u32_u32) {
   std::array<u8, 16> data_area{};
   embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};
@@ -191,6 +197,7 @@ TEST(serialize_integer, u32_u32) {
   EXPECT_EQ(data, out);
 }
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, big_endian_u32) {
   std::array<u8, 16> data_area{};
   embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};
@@ -219,6 +226,7 @@ TEST(serialize_integer, big_endian_u32) {
   EXPECT_EQ(data, out);
 }
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, little_endian_u32) {
   std::array<u8, 16> data_area{};
   embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};
@@ -254,6 +262,7 @@ TEST(serialize_integer, little_endian_u32) {
 // ██    ██  ██ ██    ██
 //  ██████   ██  ██████
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, u16) {
   std::array<u8, 16> data_area{};
   embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};
@@ -278,6 +287,7 @@ TEST(serialize_integer, u16) {
   EXPECT_EQ(data, out);
 }
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, big_endian_u16) {
   std::array<u8, 16> data_area{};
   embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};
@@ -304,6 +314,7 @@ TEST(serialize_integer, big_endian_u16) {
   EXPECT_EQ(data, out);
 }
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, little_endian_u16) {
   std::array<u8, 16> data_area{};
   embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};
@@ -337,6 +348,7 @@ TEST(serialize_integer, little_endian_u16) {
 // ██    ██ ██   ██
 //  ██████   █████
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, u8) {
   std::array<u8, 16> data_area{};
   embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};

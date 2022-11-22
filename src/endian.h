@@ -17,7 +17,7 @@ public:
       int i;
       char c;
     };
-    EndianTestUnion u;
+    EndianTestUnion u{};
     u.i = 1U;
     return u.c != 1U;
   }

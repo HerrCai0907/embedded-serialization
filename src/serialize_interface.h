@@ -18,8 +18,8 @@ public:
 
 protected:
   u32 getSizeImpl() const noexcept { return 0U; }
-  u32 serializeImpl(Span<u8> const data_area) const noexcept { return 0U; }
-  u32 deserializeImpl(Span<const u8> const data_area) noexcept { return 0U; }
+  u32 serializeImpl(Span<u8> const /*data_area*/) const noexcept { return 0U; }
+  u32 deserializeImpl(Span<const u8> const /*data_area*/) noexcept { return 0U; }
 };
 
 } // namespace embedded_serialization
