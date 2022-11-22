@@ -17,7 +17,9 @@ namespace embedded_serialization {
 
 namespace detail {
 
-template <class BigEndian, class T> class SerializeImpl {
+template <class Endian, class T> class SerializeImpl;
+
+template <class Endian, class T> class NotSupportedSerializeImpl {
 public:
   using SupportedType =
       typename std::conditional<std::is_base_of<ISerializedData<T>, T>::value, std::true_type, std::false_type>::type;
@@ -28,6 +30,64 @@ public:
   static inline u32 get_size(T const &data) noexcept { return data.get_size(); }
   static inline u32 serialize(T const &data, Span<u8> const data_area) noexcept { return data.serialize(data_area); }
   static inline u32 deserialize(Span<const u8> const data_area, T &out) noexcept { return out.deserialize(data_area); }
+};
+template <class Endian, class T> class ClassSerializeImpl {
+public:
+  using SupportedType = std::true_type;
+  using SupportedSpanContainer = std::false_type;
+  using DeserializedType = T;
+
+  static inline u32 get_size(T const &data) noexcept { return data.get_size(); }
+  static inline u32 serialize(T const &data, Span<u8> const data_area) noexcept { return data.serialize(data_area); }
+  static inline u32 deserialize(Span<const u8> const data_area, T &out) noexcept { return out.deserialize(data_area); }
+};
+template <class Endian, class T> class EnumSerializeImplImpl {
+  using UnderlyingType = typename std::make_unsigned<typename std::underlying_type<T>::type>::type;
+
+public:
+  using SupportedType = typename SerializeImpl<Endian, UnderlyingType>::SupportedType;
+  using SupportedSpanContainer = typename SerializeImpl<Endian, UnderlyingType>::SupportedSpanContainer;
+  using DeserializedType = T;
+
+  static inline u32 get_size(T const &data) noexcept {
+    return SerializeImpl<Endian, UnderlyingType>::get_size(static_cast<UnderlyingType>(data));
+  }
+  static inline u32 serialize(T const &data, Span<u8> const data_area) noexcept {
+    return SerializeImpl<Endian, UnderlyingType>::serialize(static_cast<UnderlyingType const>(data), data_area);
+  }
+  static inline u32 deserialize(Span<const u8> const data_area, T &out) noexcept {
+    UnderlyingType underlying_out;
+    u32 length = SerializeImpl<Endian, UnderlyingType>::deserialize(data_area, underlying_out);
+    out = static_cast<T>(underlying_out);
+    return length;
+  }
+};
+
+template <class Endian, class T,
+          typename std::enable_if<!(std::is_base_of<ISerializedData<T>, T>::value || std::is_enum<T>::value),
+                                  bool>::type = true>
+NotSupportedSerializeImpl<Endian, T> typeDispatch();
+template <class Endian, class T,
+          typename std::enable_if<std::is_base_of<ISerializedData<T>, T>::value, bool>::type = true>
+ClassSerializeImpl<Endian, T> typeDispatch();
+template <class Endian, class T, typename std::enable_if<std::is_enum<T>::value, bool>::type = true>
+EnumSerializeImplImpl<Endian, T> typeDispatch();
+
+template <class Endian, class T> class SerializeImpl {
+  using ImplType = decltype(typeDispatch<Endian, T>());
+
+public:
+  using SupportedType = typename ImplType::SupportedType;
+  using SupportedSpanContainer = typename ImplType::SupportedSpanContainer;
+  using DeserializedType = typename ImplType::DeserializedType;
+
+  static inline u32 get_size(T const &data) noexcept { return ImplType::get_size(data); }
+  static inline u32 serialize(T const &data, Span<u8> const data_area) noexcept {
+    return ImplType::serialize(data, data_area);
+  }
+  static inline u32 deserialize(Span<const u8> const data_area, T &out) noexcept {
+    return ImplType::deserialize(data_area, out);
+  }
 };
 
 // ██ ███    ██ ████████ ███████  ██████  ███████ ██████
