@@ -11,6 +11,7 @@ template <class T> class Span {
 public:
   Span() noexcept : data_(nullptr), size_(0U) {}
   Span(T *const data, u32 const size) noexcept : data_(data), size_(size) {}
+  // NOLINTNEXTLINE(google-explicit-constructor)
   Span(Span<typename std::remove_const<T>::type> const &v) noexcept : data_(v.data()), size_(v.size()) {}
   Span &operator=(Span<typename std::remove_const<T>::type> const &v) noexcept {
     this->data_ = v.data();
@@ -49,6 +50,7 @@ public:
     assert(size >= MinSize && size <= MaxSize);
     // LCOV_EXCL_STOP
   }
+  // NOLINTNEXTLINE(google-explicit-constructor)
   SerializedSpan(SerializedSpan<typename std::remove_const<T>::type, MinSize, MaxSize> const &v) noexcept
       : Span<T>(v.data(), v.size()) {}
   SerializedSpan &operator=(SerializedSpan<typename std::remove_const<T>::type, MinSize, MaxSize> const &v) noexcept {

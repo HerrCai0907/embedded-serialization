@@ -8,6 +8,7 @@ enum EA { E1 = 2, E2 };
 enum class EB { E1 = 4, E2 };
 enum class EC : u16 { E1 = 6, E2 };
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, enum) {
   std::array<u8, 16> data_area{};
   Span<u8> data_span{data_area.data(), data_area.size()};
@@ -29,6 +30,7 @@ TEST(serialize_integer, enum) {
   EXPECT_EQ(data, out);
 }
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, class_enum) {
   std::array<u8, 16> data_area{};
   Span<u8> data_span{data_area.data(), data_area.size()};
@@ -49,6 +51,7 @@ TEST(serialize_integer, class_enum) {
   EXPECT_EQ(data, out);
 }
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, u16_enum) {
   std::array<u8, 16> data_area{};
   Span<u8> data_span{data_area.data(), data_area.size()};

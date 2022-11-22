@@ -7,6 +7,7 @@
 
 using namespace embedded_serialization;
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_dyn_array, u32) {
   std::array<u8, 32> data_area{};
   Span<u8> data_span{data_area.data(), data_area.size()};
@@ -53,6 +54,7 @@ TEST(serialize_dyn_array, u32) {
   EXPECT_EQ(data, out);
 }
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_dyn_array, u8) {
   std::array<u8, 32> data_area{};
   Span<u8> data_span{data_area.data(), data_area.size()};
@@ -84,6 +86,7 @@ TEST(serialize_dyn_array, u8) {
   EXPECT_EQ(data, out);
 }
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_dyn_array, static_array) {
   std::array<u8, 32> data_area{};
   Span<u8> data_span{data_area.data(), data_area.size()};

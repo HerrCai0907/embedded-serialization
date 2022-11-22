@@ -24,6 +24,7 @@ public:
   std::vector<int> vec{};
 };
 
+// NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_user_defined, normal) {
   std::array<u8, 32> data_area{};
   embedded_serialization::Span<u8> const data_span{data_area.data(), data_area.size()};
