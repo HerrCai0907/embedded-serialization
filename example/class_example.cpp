@@ -2,6 +2,7 @@
 #include "serialize_interface.h"
 #include <array>
 #include <cstdint>
+#include <cstring>
 #include <iostream>
 #include <vector>
 
@@ -44,26 +45,33 @@ private:
   using ArrSpan = embedded_serialization::SerializedSpan<const uint64_t, 5U, 5U>;
   using TupleWrapper = std::tuple<VecSpan, ArrSpan, uint8_t>;
   uint32_t getSizeImpl() const noexcept {
-    TupleWrapper tuple_data =
-        std::make_tuple(VecSpan{vec_.data(), static_cast<uint32_t>(vec_.size())},
-                        ArrSpan{arr_.data(), static_cast<uint32_t>(arr_.size())}, static_cast<uint8_t>(state_));
-    return embedded_serialization::get_size(tuple_data);
+    return embedded_serialization::get_size(VecSpan{vec_.data(), static_cast<uint32_t>(vec_.size())}) +
+           embedded_serialization::get_size(ArrSpan{arr_.data(), static_cast<uint32_t>(arr_.size())}) +
+           embedded_serialization::get_size(state_);
   }
   uint32_t serializeImpl(embedded_serialization::Span<uint8_t> const data_area) const noexcept {
-    TupleWrapper tuple_data =
-        std::make_tuple(VecSpan{vec_.data(), static_cast<uint32_t>(vec_.size())},
-                        ArrSpan{arr_.data(), static_cast<uint32_t>(arr_.size())}, static_cast<uint8_t>(state_));
-    return embedded_serialization::serialization(tuple_data, data_area);
+    uint32_t offset = 0;
+    offset +=
+        embedded_serialization::serialization(VecSpan{vec_.data(), static_cast<uint32_t>(vec_.size())}, data_area);
+    offset += embedded_serialization::serialization(ArrSpan{arr_.data(), static_cast<uint32_t>(arr_.size())},
+                                                    data_area.subspan(offset));
+    offset += embedded_serialization::serialization(state_, data_area.subspan(offset));
+    return offset;
   }
   uint32_t deserializeImpl(embedded_serialization::Span<const uint8_t> const data_area) noexcept {
-    embedded_serialization::DeserializedType<TupleWrapper>::type tuple_data{};
-    uint32_t size = embedded_serialization::deserialization<TupleWrapper>(data_area, tuple_data);
-    vec_ = std::vector<uint32_t>{std::get<0>(tuple_data).begin(), std::get<0>(tuple_data).end()};
-    for (uint32_t i = 0; i < std::get<1>(tuple_data).size(); ++i) {
-      arr_[i] = std::get<1>(tuple_data)[i];
-    }
-    state_ = static_cast<State>(std::get<2>(tuple_data));
-    return size;
+    uint32_t offset = 0;
+
+    embedded_serialization::DeserializedType<VecSpan>::type vecSpan{};
+    offset += embedded_serialization::deserialization<VecSpan>(data_area, vecSpan);
+    vec_.resize(vecSpan.size());
+    std::memcpy(vec_.data(), vecSpan.data(), vecSpan.size());
+
+    embedded_serialization::DeserializedType<ArrSpan>::type arrSpan{};
+    offset += embedded_serialization::deserialization<ArrSpan>(data_area.subspan(offset), arrSpan);
+    std::memcpy(arr_.data(), arrSpan.data(), arrSpan.size());
+
+    offset += embedded_serialization::deserialization<State>(data_area.subspan(offset), state_);
+    return offset;
   }
 
   friend embedded_serialization::ISerializedData<Data>;

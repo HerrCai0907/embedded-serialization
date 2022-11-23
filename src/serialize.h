@@ -308,7 +308,7 @@ public:
   using DeserializedType =
       typename std::conditional<ElementImplType::SupportedSpanContainer::value,
                                 SerializedSpan<const typename ElementImplType::DeserializedType, MinSize, MaxSize>,
-                                std::array<typename ElementImplType::DeserializedType, MaxSize>>::type;
+                                SerializedArray<typename ElementImplType::DeserializedType, MaxSize>>::type;
   static inline u32 get_size(SerializedSpan<T, MinSize, MaxSize> const &data) noexcept {
     u32 size = sizeof(SizeType);
     for (u32 i = 0; i < data.size(); ++i) {
@@ -345,6 +345,7 @@ private:
       u32 length = SerializeImpl<Endian, CleanType>::deserialize(data_area.subspan(offset), out[i]);
       offset += length;
     }
+    out.setActualSize(static_cast<u32>(size));
     return offset;
   }
 };

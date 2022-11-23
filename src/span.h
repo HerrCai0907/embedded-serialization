@@ -2,7 +2,9 @@
 #define __EMBEDDED_SERIALIZATION_SPAN__
 
 #include "type.h"
+#include <array>
 #include <cassert>
+#include <cstdint>
 #include <type_traits>
 
 namespace embedded_serialization {
@@ -62,9 +64,36 @@ public:
   iterator end() const noexcept { return &this->data_[this->size_]; }
 };
 
+template <class T, u32 MaxSize> class SerializedArray : public std::array<T, MaxSize> {
+public:
+  SerializedArray() noexcept : std::array<T, MaxSize>{}, actualSize_{0} {}
+  u32 actualSize() const noexcept { return actualSize_; }
+  void setActualSize(u32 size) noexcept { actualSize_ = size; }
+
+private:
+  uint32_t actualSize_;
+};
+
+template <class T, class U, u32 MinSizeA, u32 MaxSizeA, u32 MinSizeB, u32 MaxSizeB>
+bool operator==(SerializedSpan<T, MinSizeA, MaxSizeA> const &lhs,
+                SerializedSpan<U, MinSizeB, MaxSizeB> const &rhs) noexcept {
+  if (lhs.size() != rhs.size()) {
+    return false;
+  }
+  for (u32 i = 0U; i < lhs.size(); ++i) {
+    if (lhs[i] != rhs[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+template <class T, class U, u32 MinSizeA, u32 MaxSizeA, u32 MinSizeB, u32 MaxSizeB>
+bool operator!=(SerializedSpan<T, MinSizeA, MaxSizeA> const &lhs,
+                SerializedSpan<U, MinSizeB, MaxSizeB> const &rhs) noexcept {
+  return !(lhs == rhs);
+}
 template <class T, class U, u32 MinSize, u32 MaxSize>
-bool operator==(SerializedSpan<T, MinSize, MaxSize> const &lhs,
-                SerializedSpan<U, MinSize, MaxSize> const &rhs) noexcept {
+bool operator==(SerializedSpan<T, MinSize, MaxSize> const &lhs, U const &rhs) noexcept {
   if (lhs.size() != rhs.size()) {
     return false;
   }
@@ -76,8 +105,7 @@ bool operator==(SerializedSpan<T, MinSize, MaxSize> const &lhs,
   return true;
 }
 template <class T, class U, u32 MinSize, u32 MaxSize>
-bool operator!=(SerializedSpan<T, MinSize, MaxSize> const &lhs,
-                SerializedSpan<U, MinSize, MaxSize> const &rhs) noexcept {
+bool operator!=(SerializedSpan<T, MinSize, MaxSize> const &lhs, U const &rhs) noexcept {
   return !(lhs == rhs);
 }
 
