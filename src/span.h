@@ -32,7 +32,12 @@ public:
   T *data() const noexcept { return data_; }
   u32 size() const noexcept { return size_; }
 
-  Span<T> subspan(u32 const offset) const noexcept { return Span<T>{&at(offset), size_ - offset}; }
+  Span<T> subspan(u32 const offset) const noexcept {
+    // LCOV_EXCL_START
+    assert(size_ >= offset);
+    // LCOV_EXCL_STOP
+    return Span<T>{&data_[offset], size_ - offset};
+  }
   void reset(T *const data, u32 const size) noexcept {
     data_ = data;
     size_ = size;

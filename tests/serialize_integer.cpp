@@ -10,7 +10,7 @@ using u8 = uint8_t;
 
 // NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-special-member-functions)
 TEST(serialize_integer, const_type) {
-  std::array<u8, 16> data_area{};
+  std::array<u8, 1> data_area{};
   embedded_serialization::Span<u8> data_span{data_area.data(), data_area.size()};
 
   std::tuple<const u8> data{0x0f};
@@ -18,7 +18,7 @@ TEST(serialize_integer, const_type) {
   auto serialize_length = embedded_serialization::serialization(data, data_span);
   EXPECT_EQ(embedded_serialization::get_size(data), serialize_length);
 
-  std::array<u8, 16> expect_data_area{};
+  std::array<u8, 1> expect_data_area{};
   expect_data_area[0U] = 0x0f;
 
   EXPECT_EQ(serialize_length, 1U);
