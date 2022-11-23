@@ -23,8 +23,9 @@ int main() {
   // prepare data
   DataType data = std::make_tuple(
       25U, embedded_serialization::SerializedSpan<std::tuple<uint16_t, uint16_t>, 0U, 256U>(meta.data(), meta.size()),
-      embedded_serialization::SerializedSpan<uint8_t const, 0, 128U>(reinterpret_cast<uint8_t const *>(message.data()),
-                                                                     message.size()));
+      embedded_serialization::SerializedSpan<uint8_t const, 0, 128U>(
+          reinterpret_cast<uint8_t const *>(message.data()), // NOLINT
+          message.size()));
   // serialization
   auto size = embedded_serialization::serialization(
       data, embedded_serialization::Span<uint8_t>(data_exchange_array.data(), data_exchange_array.size()));
@@ -42,9 +43,12 @@ int main() {
 
   // dump deserialized result
   std::cout << "element 0: " << std::get<0>(out) << std::endl;
-  std::cout << "element 1[0][0]: " << std::get<0>(std::get<1>(out)[0]) << std::endl;
-  std::cout << "element 1[0][1]: " << std::get<1>(std::get<1>(out)[0]) << std::endl;
-  std::cout << "element 1[1][0]: " << std::get<0>(std::get<1>(out)[1]) << std::endl;
-  std::cout << "element 1[1][1]: " << std::get<1>(std::get<1>(out)[1]) << std::endl;
+
+  auto const &meta_out = std::get<1>(out);
+  for (uint32_t i = 0; i < meta_out.actualSize(); i++) {
+    std::cout << "element 1[" << i << "][0]: " << std::get<0>(meta_out[i]) << std::endl;
+    std::cout << "element 1[" << i << "][1]: " << std::get<1>(meta_out[i]) << std::endl;
+  }
+
   std::cout << "element 2: " << std::get<2>(out).data() << std::endl;
 }
